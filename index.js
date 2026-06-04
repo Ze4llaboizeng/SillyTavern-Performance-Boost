@@ -1,4 +1,4 @@
-import { extension_settings, getContext } 
+import { extension_settings, getContext } from '../../../extensions.js';
 const { saveSettingsDebounced } = getContext();
 import { eventSource, event_types as eventTypes }    from "../../../../script.js";
 const EXT_NAME = "SillyTavern-Performance-Boost";
