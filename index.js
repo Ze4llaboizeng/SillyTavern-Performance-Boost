@@ -157,7 +157,7 @@ function _onMemoryPressure(info) {
 }
 
 function _bindSTEvents() {
-    eventSource.on(eventTypes.CHAT_CHANGED, () => {
+    eventSource.on(event_types.CHAT_CHANGED, () => {
         state.modules.messageVirtualization?.onChatChanged?.();
         setTimeout(() => state.modules.imageOptimizer?.scanImages?.(), 300);
     });
@@ -165,8 +165,8 @@ function _bindSTEvents() {
         state.modules.imageOptimizer?.scanImages?.();
         state.modules.messageVirtualization?.onMessageAdded?.();
     }, 120);
-    eventSource.on(eventTypes.MESSAGE_RECEIVED, onNewMsg);
-    eventSource.on(eventTypes.MESSAGE_SENT, onNewMsg);
+    eventSource.on(event_types.MESSAGE_RECEIVED, onNewMsg);
+    eventSource.on(event_types.MESSAGE_SENT, onNewMsg);
 }
 
 jQuery(() => { boot().catch(err => console.error(`${LOG} Boot error:`, err)); });
