@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release zip
+        run: |
+          mkdir -p dist
+          zip -r dist/performance-boost-${{ steps.tag.outputs.TAG }}.zip \
+            . \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "dist/*" \
+            --exclude "*.md" \
+            --exclude "CHANGELOG.md"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Performance Boost ${{ steps.tag.outputs.TAG }}"
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          generate_release_notes: true
+          files: dist/performance-boost-${{ steps.tag.outputs.TAG }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
