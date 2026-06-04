@@ -13,14 +13,12 @@ async load() {
         try {
             const html = await fetch(`/${this.EXT_PATH}/settings.html`).then(r => r.text());
             
-            // ลองหาคอนเทนเนอร์หลักของเมนู Extensions (กล่องสามกล่อง)
-            const extensionContainer = $("#extensions_settings"); // หรือลองใช้ ".extension_settings" ถ้ามันเป็นคลาส
+            const extensionContainer = $("#extensions_settings")
             
             if (extensionContainer.length > 0) {
                  extensionContainer.append(html);
                  console.log("[⚡ PerfBoost] Successfully appended UI to settings panel.");
             } else {
-                 // สำรองไว้เผื่อเวอร์ชันใหม่ๆ มีการเปลี่ยนชื่อ id หรือ class 
                  console.warn("[⚡ PerfBoost] Container not found, appending to body as fallback...");
                  $("body").append(`<div id="pb-floating-panel" class="sillytavern-panel">${html}</div>`);
             }
