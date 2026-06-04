@@ -1,0 +1,39 @@
+name: "💡 Feature Request"
+description: Suggest a new optimization or improvement
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What performance problem does this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+    validations:
+      required: false
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target device tier
+      multiple: true
+      options:
+        - Low (≤1 GB)
+        - Medium (2–3 GB)
+        - High (4+ GB)
+        - All tiers
+    validations:
+      required: false
