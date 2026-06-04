@@ -1,7 +1,7 @@
 /* ============================================================
    SillyTavern Performance Boost — style.css
    Tier-aware CSS that activates based on the <body> class
-   set by the extension:  pb-tier-low | pb-tier-medium | pb-tier-high
+   set by the extension:  pb-tier-low | pb-tier-medium | pb-tier-good | pb-tier-high
    ============================================================ */
 
 /* ── Chat container baseline ─────────────────────────────── */
@@ -78,9 +78,18 @@ body.pb-tier-medium * {
 }
 
 /* ══════════════════════════════════════════════════════════
+   GOOD-TIER — near-full fidelity; minimal hints only
+   ══════════════════════════════════════════════════════════ */
+
+body.pb-tier-good #chat .mes_text {
+    text-rendering: optimizeLegibility;
+}
+
+/* ══════════════════════════════════════════════════════════
    HIGH-TIER — no restrictions; hints only
    ══════════════════════════════════════════════════════════ */
 
+body.pb-tier-good #chat,
 body.pb-tier-high #chat {
     /* Hint the browser which layer to pre-composite */
     will-change: transform;
@@ -246,4 +255,114 @@ body.pb-show-hud #pb-hud {
 
 .pb-badge-low    { background: #c0392b22; color: #e74c3c; }
 .pb-badge-medium { background: #e67e2222; color: #e67e22; }
+.pb-badge-good   { background: #2980b922; color: #3498db; }
 .pb-badge-high   { background: #27ae6022; color: #2ecc71; }
+
+/* ══════════════════════════════════════════════════════════
+   Heap-boost recommendation modal
+   Suggests raising Node's --max-old-space-size when the JS heap
+   is tight but the device still has spare RAM.
+   ══════════════════════════════════════════════════════════ */
+
+#pb-boost-overlay {
+    position:        fixed;
+    inset:           0;
+    z-index:         10050;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    padding:         16px;
+    background:      rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+#pb-boost-modal {
+    position:      relative;
+    width:         min(440px, 100%);
+    max-height:    90vh;
+    overflow-y:    auto;
+    padding:       20px 22px 18px;
+    border-radius: 10px;
+    background:    var(--SmartThemeBlurTintColor, #2b2b33);
+    color:        var(--SmartThemeBodyColor, #e8e8e8);
+    box-shadow:   0 12px 40px rgba(0, 0, 0, 0.5);
+    border:       1px solid rgba(255, 255, 255, 0.08);
+}
+
+#pb-boost-modal h3 {
+    margin:      0 0 12px;
+    font-size:   1.05rem;
+    font-weight: 700;
+}
+
+#pb-boost-close {
+    position:    absolute;
+    top:         10px;
+    right:       12px;
+    width:       26px;
+    height:      26px;
+    padding:     0;
+    border:      none;
+    border-radius: 6px;
+    background:  none;
+    color:      inherit;
+    opacity:    0.6;
+    cursor:     pointer;
+    font-size:  0.95rem;
+}
+
+#pb-boost-close:hover { opacity: 1; }
+
+.pb-boost-desc {
+    margin:      0 0 10px;
+    font-size:   0.85rem;
+    line-height: 1.5;
+    opacity:     0.92;
+}
+
+.pb-boost-cmd-row {
+    display:     flex;
+    align-items: stretch;
+    gap:         6px;
+    margin:      10px 0 6px;
+}
+
+#pb-boost-cmd {
+    flex:          1;
+    min-width:     0;
+    padding:       8px 10px;
+    border-radius: 6px;
+    background:    rgba(0, 0, 0, 0.35);
+    color:        #0f9;
+    font-family:  monospace;
+    font-size:    0.74rem;
+    line-height:  1.4;
+    word-break:   break-all;
+    user-select:  all;
+}
+
+#pb-boost-copy { white-space: nowrap; align-self: center; }
+
+.pb-boost-note {
+    display:     block;
+    margin:      4px 0 0;
+    opacity:     0.55;
+    font-size:   0.72rem;
+    line-height: 1.5;
+}
+
+.pb-boost-note code {
+    font-size:    0.7rem;
+    word-break:   break-all;
+    background:   rgba(0, 0, 0, 0.25);
+    padding:      1px 4px;
+    border-radius: 3px;
+}
+
+.pb-boost-actions {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    gap:             10px;
+    margin-top:      16px;
+}

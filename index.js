@@ -99,6 +99,9 @@ async function _detectDevice() {
             saveSettingsDebounced();
         }
         _applyTierClass(state.appliedTier);
+
+        // Heap is tight but the machine has spare RAM → offer a NODE_OPTIONS boost.
+        settingsPanel?.maybeShowHeapBoost?.(state.deviceProfile.heapBoost);
     } catch (err) {
         console.warn(`${LOG} Device detection error:`, err);
     }
@@ -106,7 +109,7 @@ async function _detectDevice() {
 
 function _applyTierClass(tier) {
     if (!tier || tier === "auto") return;
-    document.body.classList.remove("pb-tier-low", "pb-tier-medium", "pb-tier-high");
+    document.body.classList.remove("pb-tier-low", "pb-tier-medium", "pb-tier-good", "pb-tier-high");
     document.body.classList.add(`pb-tier-${tier}`);
 }
 

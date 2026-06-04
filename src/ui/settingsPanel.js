@@ -8,6 +8,8 @@ export class SettingsPanel {
         this.actions = actions; // Contains callbacks to core functions like saveSettings, restartModule
         this.EXT_PATH = actions.EXT_PATH;
         this._ramTimer = null;
+        // localStorage key — lets the user dismiss the heap-boost tip permanently.
+        this._boostDismissKey = "pb-heap-boost-dismissed";
     }
 
     async load() {
@@ -230,12 +232,107 @@ export class SettingsPanel {
 
         if (this.state.deviceProfile) {
             const p = this.state.deviceProfile;
-            const tierLabel = p.tier.toUpperCase();
+            const label    = p.tierLabel ? ` (${p.tierLabel})` : "";
+            const tierText = `${p.tier.toUpperCase()}${label}`;
+            const scoreText = (typeof p.score === "number") ? ` · score ${p.score}/16` : "";
             const type      = p.isMobile ? "📱 Mobile" : "🖥️ Desktop";
+            // The tier is now driven primarily by the JS heap ceiling; surface it.
+            const heapText  = p.heapLimitMB
+                ? ` · heap ${(p.heapLimitMB / 1024).toFixed(1)} GB`
+                : "";
+            const srcText   = p.tierSource === "heap" ? " (from heap)" : scoreText;
             $("#pb-device-info-text").text(
-                `${tierLabel} tier · ${p.memory} GB RAM · ${p.cores} cores · ${type} · ~${p.fps} FPS`
+                `${tierText} tier${srcText} · ${p.memory} GB RAM · ${p.cores} cores · ${type} · ~${p.fps} FPS${heapText}`
             );
             $("#pb-device-info").show();
         }
+    }
+
+    // ─── Heap boost recommendation (NODE_OPTIONS) ───────────────────────────
+
+    /**
+     * Show a one-time tip recommending a larger Node heap when the JS heap
+     * ceiling is tight but the machine still has spare RAM to spend.
+     * Skips entirely if there's nothing worth recommending or the user has
+     * already dismissed it permanently.
+     * @param {{ show:boolean, suggestedMB:number, currentLimitMB:number|null, deviceMemoryGB:number, command:string }} boost
+     */
+    maybeShowHeapBoost(boost) {
+        if (!boost?.show) return;
+        try {
+            if (localStorage.getItem(this._boostDismissKey) === "1") return;
+        } catch { /* localStorage unavailable — show anyway */ }
+        if ($("#pb-boost-overlay").length) return; // already open
+        this._renderHeapBoostModal(boost);
+    }
+
+    _renderHeapBoostModal(boost) {
+        const self      = this;
+        const limitText = boost.currentLimitMB
+            ? `${(boost.currentLimitMB / 1024).toFixed(1)} GB`
+            : "ตรวจไม่ได้";
+        const suggGB    = (boost.suggestedMB / 1024).toFixed(0);
+        const cmd       = boost.command;
+
+        const $overlay = $(`
+            <div id="pb-boost-overlay">
+                <div id="pb-boost-modal" role="dialog" aria-modal="true" aria-labelledby="pb-boost-title">
+                    <button type="button" id="pb-boost-close" aria-label="Close">✕</button>
+                    <h3 id="pb-boost-title">⚡ เพิ่มหน่วยความจำให้ลื่นขึ้นได้</h3>
+                    <p class="pb-boost-desc">
+                        เครื่องของคุณมี RAM เหลือพอ (${boost.deviceMemoryGB} GB)
+                        แต่เพดาน JS heap ปัจจุบันอยู่ที่ <b>${limitText}</b> เท่านั้น
+                        การเพิ่มเพดานเป็น <b>${suggGB} GB</b> จะช่วยให้แชทยาว ๆ ลื่นขึ้น
+                        และลดอาการค้าง
+                    </p>
+                    <p class="pb-boost-desc">
+                        รันคำสั่งนี้ใน terminal ของเครื่องที่รัน SillyTavern
+                        แล้วเปิดโปรแกรมใหม่:
+                    </p>
+                    <div class="pb-boost-cmd-row">
+                        <code id="pb-boost-cmd">${cmd}</code>
+                        <button type="button" id="pb-boost-copy" class="menu_button">คัดลอก</button>
+                    </div>
+                    <small class="pb-boost-note">
+                        * คำสั่งนี้ใช้กับ Linux/macOS (bash) — Windows ใช้
+                        <code>setx NODE_OPTIONS "--max-old-space-size=${boost.suggestedMB}"</code>
+                    </small>
+                    <div class="pb-boost-actions">
+                        <label class="checkbox_label" for="pb-boost-dont-show">
+                            <input type="checkbox" id="pb-boost-dont-show" />
+                            <span><small>ไม่ต้องแสดงอีก</small></span>
+                        </label>
+                        <button type="button" id="pb-boost-ok" class="menu_button">เข้าใจแล้ว</button>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        const close = () => {
+            if ($("#pb-boost-dont-show").is(":checked")) {
+                try { localStorage.setItem(self._boostDismissKey, "1"); } catch { /* ignore */ }
+            }
+            $overlay.remove();
+        };
+
+        $overlay.find("#pb-boost-copy").on("click", function () {
+            const done = () => $(this).text("คัดลอกแล้ว ✓");
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(cmd).then(done).catch(() => {});
+            } else {
+                // Fallback for non-secure contexts where Clipboard API is blocked.
+                const ta = document.createElement("textarea");
+                ta.value = cmd;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand("copy"); done(); } catch { /* ignore */ }
+                ta.remove();
+            }
+        });
+
+        $overlay.find("#pb-boost-close, #pb-boost-ok").on("click", close);
+        $overlay.on("click", function (e) { if (e.target === this) close(); });
+
+        $("body").append($overlay);
     }
 }
