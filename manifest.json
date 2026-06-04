@@ -4,9 +4,9 @@
     "description": "Optimizes SillyTavern for mobile devices — virtual scrolling, lazy images, memory management, and automatic device profiling for both low-end and high-end phones.",
     "js": "index.js",
     "css": "style.css",
+    "settings": "settings.html",
     "author": "Zealllll",
     "homepage": "https://github.com/Ze4llaboizeng/SillyTavern-Performance-Boost",
     "tags": ["performance", "mobile", "optimization"],
-    "settings": "settings.html",
     "requires": []
 }
