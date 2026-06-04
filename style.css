@@ -1,0 +1,150 @@
+/* ============================================================
+   SillyTavern Performance Boost — style.css
+   Tier-aware CSS that activates based on the <body> class
+   set by the extension:  pb-tier-low | pb-tier-medium | pb-tier-high
+   ============================================================ */
+
+/* ── Chat container baseline ─────────────────────────────── */
+#chat {
+    /* Enable hardware-accelerated scrolling on all devices */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior:            auto;     /* disable smooth-scroll on mobile for speed */
+    overscroll-behavior:        contain;
+}
+
+/* ── Message containment hint ───────────────────────────────
+   `contain: layout style` tells the browser each message is
+   self-contained — changes inside one message don't affect
+   layout of others. This cuts style-recalc cost significantly.
+ ──────────────────────────────────────────────────────────── */
+#chat .mes {
+    contain:                  layout style;
+    /* content-visibility is injected by VirtualScroll.js dynamically */
+}
+
+/* ── Image rendering hints ──────────────────────────────────
+   image-rendering: auto is default but spell it out explicitly
+   for GPU-composited layers.
+ ──────────────────────────────────────────────────────────── */
+#chat .avatar img,
+#chat .mes_img,
+#expression-holder img {
+    image-rendering: auto;
+    decoding:        async;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOW-TIER  — aggressively strip expensive visual effects
+   ══════════════════════════════════════════════════════════ */
+
+body.pb-tier-low #chat .mes {
+    /* Remove paint-heavy decorations */
+    backdrop-filter:         none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.pb-tier-low #chat .mes_text {
+    /* Avoid sub-pixel text effects */
+    text-rendering:                 optimizeSpeed;
+    -webkit-font-smoothing:         none;
+    font-feature-settings:          normal;
+}
+
+body.pb-tier-low #chat .avatar img {
+    /* Cheap scaling on low-end GPU */
+    image-rendering: pixelated;
+}
+
+/* Disable all CSS keyframe animations for low-end */
+body.pb-tier-low *,
+body.pb-tier-low *::before,
+body.pb-tier-low *::after {
+    animation-duration:        0.001ms !important;
+    animation-iteration-count: 1       !important;
+    transition-duration:       0.001ms !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEDIUM-TIER — light optimizations
+   ══════════════════════════════════════════════════════════ */
+
+body.pb-tier-medium #chat .mes_text {
+    text-rendering: optimizeLegibility;
+}
+
+/* Keep transitions but cap them at 150 ms */
+body.pb-tier-medium * {
+    transition-duration: min(var(--transition-duration, 0.3s), 0.15s) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HIGH-TIER — no restrictions; hints only
+   ══════════════════════════════════════════════════════════ */
+
+body.pb-tier-high #chat {
+    /* Hint the browser which layer to pre-composite */
+    will-change: transform;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Performance HUD  (hidden by default, shown when showHUD=true)
+   ══════════════════════════════════════════════════════════ */
+
+#pb-hud {
+    display:          none;
+    position:         fixed;
+    top:              8px;
+    right:            8px;
+    z-index:          9999;
+    padding:          6px 10px;
+    border-radius:    6px;
+    font-family:      monospace;
+    font-size:        11px;
+    background:       rgba(0, 0, 0, 0.7);
+    color:            #0f9;
+    pointer-events:   none;
+    white-space:      nowrap;
+}
+
+body.pb-show-hud #pb-hud {
+    display: block;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Extension Settings Panel styling
+   ══════════════════════════════════════════════════════════ */
+
+#pb-settings-panel {
+    padding: 8px 0;
+}
+
+#pb-settings-panel .pb-section-title {
+    font-size:   0.8rem;
+    font-weight: 700;
+    opacity:     0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 12px 0 6px;
+}
+
+#pb-device-info {
+    display:       none;        /* shown via JS once device is detected */
+    background:    rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding:       6px 10px;
+    font-size:     0.8rem;
+    margin-bottom: 10px;
+}
+
+.pb-badge {
+    display:        inline-block;
+    padding:        2px 7px;
+    border-radius:  4px;
+    font-size:      0.72rem;
+    font-weight:    600;
+    text-transform: uppercase;
+}
+
+.pb-badge-low    { background: #c0392b22; color: #e74c3c; }
+.pb-badge-medium { background: #e67e2222; color: #e67e22; }
+.pb-badge-high   { background: #27ae6022; color: #2ecc71; }
