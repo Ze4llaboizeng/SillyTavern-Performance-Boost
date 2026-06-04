@@ -1,6 +1,8 @@
-import { extension_settings, getContext } from '../../../extensions.js';
-const { saveSettingsDebounced } = getContext();
-import { eventSource, event_types as eventTypes }    from "../../../../script.js";
+import { extension_settings } from "../../../extensions.js";
+import { eventSource, event_types } from "../../../../script.js";
+
+const { saveSettingsDebounced } = SillyTavern.getContext();
+
 const EXT_NAME = "SillyTavern-Performance-Boost";
 const EXT_PATH = `scripts/extensions/third-party/${EXT_NAME}`;
 const LOG      = "[⚡ PerfBoost]";
@@ -156,7 +158,6 @@ function _onMemoryPressure(info) {
     window.gc?.();
     toastr?.warning(`Memory pressure detected (${info.reason}).`, "Performance Boost", { timeOut: 4000, positionClass: "toast-bottom-right" });
 }
-
 function _bindSTEvents() {
     eventSource.on(event_types.CHAT_CHANGED, () => {
         state.modules.messageVirtualization?.onChatChanged?.();
