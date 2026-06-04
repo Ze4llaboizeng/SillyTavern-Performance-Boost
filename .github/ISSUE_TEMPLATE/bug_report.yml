@@ -1,0 +1,74 @@
+name: "🐛 Bug Report"
+description: Report a bug or unexpected behaviour (แจ้งปัญหา/บั๊กที่พบ)
+labels: ["bug"]
+
+body:
+  - type: dropdown
+    id: device-type
+    attributes:
+      label: Device type
+      description: ประเภทของอุปกรณ์ที่เกิดปัญหา
+      options:
+        - Android phone
+        - iPhone / iPad
+        - Desktop browser (Chrome / Firefox / Safari)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: ram
+    attributes:
+      label: Device RAM (approximate)
+      description: ความจุแรมของอุปกรณ์โดยประมาณ
+      placeholder: "e.g. 2 GB, 4 GB"
+    validations:
+      required: false
+
+  - type: input
+    id: st-version
+    attributes:
+      label: SillyTavern version
+      description: เวอร์ชันของ SillyTavern ที่ใช้งานอยู่
+      placeholder: "e.g. 1.12.5"
+    validations:
+      required: true
+
+  - type: input
+    id: ext-version
+    attributes:
+      label: Performance Boost version
+      description: เวอร์ชันของ Extension นี้
+      placeholder: "e.g. 0.0.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: อธิบายปัญหาหรืออาการที่เกิดขึ้นอย่างละเอียดและชัดเจน
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: ขั้นตอนการกดหรือทดสอบที่ทำให้เจอบั๊กนี้ (เรียงเป็นข้อๆ)
+      placeholder: |
+        1. Open ST on mobile
+        2. Load a long chat (100+ messages)
+        3. Enable Message Virtualization
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser console errors (if any)
+      description: โค้ดข้อผิดพลาดจาก Developer Console ในเบราว์เซอร์ (ถ้ามี)
+      render: text
+    validations:
+      required: false
