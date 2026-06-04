@@ -90,7 +90,7 @@ async function _detectDevice() {
 
         if (cfg().deviceTier === "auto") {
             const rec = detector.getRecommendedSettings();
-            if (rec.aggressiveVirtualization) cfg()..aggressiveMode = true;
+            if (rec.aggressiveVirtualization) cfg().messageVirtualization.aggressiveMode = true;
             if (rec.reduceAnimations) {
                 cfg().animationReducer.enabled      = true;
                 cfg().animationReducer.disableBlur  = rec.disableBlur  ?? false;
@@ -110,13 +110,13 @@ function _applyTierClass(tier) {
     document.body.classList.add(`pb-tier-${tier}`);
 }
 
-// Module map matching the new folder structure
+// FIX: Module paths now match the actual file names in /src/
 const MODULE_DEFS = {
-    messageVirtualization: { path: "optimizations/virtualScroll.js", Class: "VirtualScroll", start: (m) => m.init() },
-    animationReducer:      { path: "optimizations/animationController.js", Class: "AnimationController", start: (m) => m.init()},
-    imageOptimizer:        { path: "optimizations/imageOptimizer.js", Class: "ImageOptimizer", start: (m) => m.init() },
-    scrollOptimizer:       { path: "optimizations/scrollOptimizer.js", Class: "ScrollOptimizer", start: (m) => m.init() },
-    memoryManager:         { path: "core/memoryManager.js", Class: "MemoryMonitor", start: (m) => m.start(), extraArgs: () => [_onMemoryPressure] },
+    messageVirtualization: { path: "optimizations/virtualScroll.js",       Class: "VirtualScroll",      start: (m) => m.init() },
+    imageOptimizer:        { path: "optimizations/imageOptimizer.js",       Class: "ImageOptimizer",     start: (m) => m.init() },
+    scrollOptimizer:       { path: "optimizations/scrollOptimizer.js",      Class: "ScrollOptimizer",    start: (m) => m.init() },
+    animationReducer:      { path: "optimizations/animationController.js",  Class: "AnimationController",start: (m) => m.init() },
+    memoryManager:         { path: "core/memoryMonitor.js",                 Class: "MemoryMonitor",      start: (m) => m.start(), extraArgs: () => [_onMemoryPressure] },
 };
 
 async function _startModules() {
