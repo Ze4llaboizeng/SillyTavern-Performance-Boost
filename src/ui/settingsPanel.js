@@ -9,20 +9,23 @@ export class SettingsPanel {
         this.EXT_PATH = actions.EXT_PATH;
     }
 
-async load() {
+    async load() {
         try {
-            const html = await fetch(`/${this.EXT_PATH}/settings.html`).then(r => r.text());
-            
-            const extensionContainer = $("#extensions_settings")
-            
-            if (extensionContainer.length > 0) {
-                 extensionContainer.append(html);
-                 console.log("[⚡ PerfBoost] Successfully appended UI to settings panel.");
-            } else {
-                 console.warn("[⚡ PerfBoost] Container not found, appending to body as fallback...");
-                 $("body").append(`<div id="pb-floating-panel" class="sillytavern-panel">${html}</div>`);
+            // FIX: SillyTavern already injects settings.html via manifest.json's "settings" field.
+            // Only fetch and append manually if it hasn't been loaded yet (e.g. older ST versions).
+            if ($("#pb-settings-panel").length === 0) {
+                const html = await fetch(`/${this.EXT_PATH}/settings.html`).then(r => r.text());
+                const extensionContainer = $("#extensions_settings");
+
+                if (extensionContainer.length > 0) {
+                    extensionContainer.append(html);
+                    console.log("[⚡ PerfBoost] Manually appended UI to settings panel.");
+                } else {
+                    console.warn("[⚡ PerfBoost] Container not found, appending to body as fallback...");
+                    $("body").append(`<div id="pb-floating-panel" class="sillytavern-panel">${html}</div>`);
+                }
             }
-            
+
             this._bindUI();
         } catch (err) {
             console.warn(`[⚡ PerfBoost] Could not load settings panel:`, err);
