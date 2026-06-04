@@ -7,7 +7,6 @@ const EXT_NAME = "SillyTavern-Performance-Boost";
 const EXT_PATH = `scripts/extensions/third-party/${EXT_NAME}`;
 const LOG      = "[⚡ PerfBoost]";
 
-// Adjusted defaults to match the new file names
 const DEFAULTS = {
     enabled:    true,
     autoDetect: true,
@@ -33,7 +32,7 @@ const state = {
     },
 };
 
-let settingsPanel = null; // UI Controller instance
+let settingsPanel = null;
 
 function loadSettings() {
     extension_settings[EXT_NAME] ??= {};
@@ -56,7 +55,6 @@ function _deepMergeDefaults(target, defaults) {
 async function boot() {
     loadSettings();
     
-    // Load UI Component dynamically
     const { SettingsPanel } = await import(`/${EXT_PATH}/src/ui/settingsPanel.js`);
     settingsPanel = new SettingsPanel(state, {
         EXT_PATH, cfg, saveSettings: saveSettingsDebounced, 
@@ -112,7 +110,6 @@ function _applyTierClass(tier) {
     document.body.classList.add(`pb-tier-${tier}`);
 }
 
-// FIX: Module paths now match the actual file names in /src/
 const MODULE_DEFS = {
     messageVirtualization: { path: "optimizations/virtualScroll.js",       Class: "VirtualScroll",      start: (m) => m.init() },
     imageOptimizer:        { path: "optimizations/imageOptimizer.js",       Class: "ImageOptimizer",     start: (m) => m.init() },
@@ -158,6 +155,7 @@ function _onMemoryPressure(info) {
     window.gc?.();
     toastr?.warning(`Memory pressure detected (${info.reason}).`, "Performance Boost", { timeOut: 4000, positionClass: "toast-bottom-right" });
 }
+
 function _bindSTEvents() {
     eventSource.on(event_types.CHAT_CHANGED, () => {
         state.modules.messageVirtualization?.onChatChanged?.();
