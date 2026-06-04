@@ -1,6 +1,5 @@
 import { extension_settings, saveSettingsDebounced } from "../../../extensions.js";
-import { eventSource, eventTypes }                   from "../../../../script.js";
-
+import { eventSource, event_types as eventTypes }    from "../../../../script.js";
 const EXT_NAME = "SillyTavern-Performance-Boost";
 const EXT_PATH = `scripts/extensions/third-party/${EXT_NAME}`;
 const LOG      = "[⚡ PerfBoost]";
