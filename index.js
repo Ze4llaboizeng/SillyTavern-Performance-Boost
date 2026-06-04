@@ -112,8 +112,8 @@ function _applyTierClass(tier) {
 
 // Module map matching the new folder structure
 const MODULE_DEFS = {
-    messageVirtualization: { path: "optimizations/virtualScroll.js", Class: "VirtualScroll", ... },
-    animationReducer:      { path: "optimizations/animationController.js", Class: "AnimationController", ... },
+    messageVirtualization: { path: "optimizations/virtualScroll.js", Class: "VirtualScroll", start: (m) => m.init() },
+    animationReducer:      { path: "optimizations/animationController.js", Class: "AnimationController", start: (m) => m.init()},
     imageOptimizer:        { path: "optimizations/imageOptimizer.js", Class: "ImageOptimizer", start: (m) => m.init() },
     scrollOptimizer:       { path: "optimizations/scrollOptimizer.js", Class: "ScrollOptimizer", start: (m) => m.init() },
     memoryManager:         { path: "core/memoryManager.js", Class: "MemoryMonitor", start: (m) => m.start(), extraArgs: () => [_onMemoryPressure] },
