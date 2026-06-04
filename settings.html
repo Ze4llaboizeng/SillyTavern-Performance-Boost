@@ -16,77 +16,151 @@
 
     <div class="extension_content" id="pb-settings-content">
 
-        <!-- Device Info Banner -->
-        <div id="pb-device-info">
-            <span id="pb-device-info-text">Detecting device…</span>
+        <!-- ════════════════════════════════════════════════════
+             Section: Device Profile  (collapsible)
+             ════════════════════════════════════════════════════ -->
+        <div class="pb-section" data-pb-section="device">
+            <button type="button" class="pb-section-header" aria-expanded="true">
+                <span class="pb-section-title">Device Profile</span>
+                <span class="pb-section-arrow">▾</span>
+            </button>
+
+            <div class="pb-section-body">
+                <!-- Device Info Banner -->
+                <div id="pb-device-info">
+                    <span id="pb-device-info-text">Detecting device…</span>
+                </div>
+
+                <label class="checkbox_label" for="pb-auto-detect" title="Automatically detect device and apply best settings">
+                    <input type="checkbox" id="pb-auto-detect" />
+                    <span>Auto-detect device tier</span>
+                </label>
+
+                <div style="margin-top:6px;">
+                    <label for="pb-device-tier" style="font-size:0.85rem;">Manual tier override:</label>
+                    <select id="pb-device-tier" class="text_pole" style="margin-left:6px; width:auto;">
+                        <option value="auto">Auto (recommended)</option>
+                        <option value="low">🔴 Low  (≤1 GB RAM)</option>
+                        <option value="medium">🟡 Medium (2–3 GB)</option>
+                        <option value="high">🟢 High  (4+ GB)</option>
+                    </select>
+                </div>
+
+                <button id="pb-redetect-btn" class="menu_button" style="margin-top:8px; font-size:0.8rem;">
+                    Re-detect Device
+                </button>
+            </div>
         </div>
 
-        <!-- Device Detection -->
-        <div class="pb-section-title">Device Profile</div>
+        <!-- ════════════════════════════════════════════════════
+             Section: Memory Monitor  (collapsible) — live RAM usage
+             ════════════════════════════════════════════════════ -->
+        <div class="pb-section" data-pb-section="memory">
+            <button type="button" class="pb-section-header" aria-expanded="true">
+                <span class="pb-section-title">Memory Monitor</span>
+                <span class="pb-section-arrow">▾</span>
+            </button>
 
-        <label class="checkbox_label" for="pb-auto-detect" title="Automatically detect device and apply best settings">
-            <input type="checkbox" id="pb-auto-detect" />
-            <span>Auto-detect device tier</span>
-        </label>
+            <div class="pb-section-body">
+                <label class="checkbox_label" for="pb-memory-monitor"
+                       title="Watch JS heap usage and message count; escalate virtual scrolling under pressure">
+                    <input type="checkbox" id="pb-memory-monitor" />
+                    <span>Enable Memory Monitor</span>
+                </label>
+                <small style="display:block; opacity:0.6; margin: 2px 0 8px 24px;">
+                    Triggers aggressive virtual scroll when memory is tight.
+                </small>
 
-        <div style="margin-top:6px;">
-            <label for="pb-device-tier" style="font-size:0.85rem;">Manual tier override:</label>
-            <select id="pb-device-tier" class="text_pole" style="margin-left:6px; width:auto;">
-                <option value="auto">Auto (recommended)</option>
-                <option value="low">🔴 Low  (≤1 GB RAM)</option>
-                <option value="medium">🟡 Medium (2–3 GB)</option>
-                <option value="high">🟢 High  (4+ GB)</option>
-            </select>
+                <!-- Live RAM usage display -->
+                <div id="pb-ram-monitor">
+                    <div class="pb-ram-row">
+                        <span class="pb-ram-label">JS Heap</span>
+                        <span id="pb-ram-heap-text" class="pb-ram-value">measuring…</span>
+                    </div>
+                    <div class="pb-ram-bar">
+                        <div id="pb-ram-bar-fill"></div>
+                        <div id="pb-ram-threshold-marker"></div>
+                    </div>
+                    <div class="pb-ram-row" style="margin-top:6px;">
+                        <span class="pb-ram-label">Messages rendered</span>
+                        <span id="pb-ram-msg-count" class="pb-ram-value">—</span>
+                    </div>
+                </div>
+
+                <!-- Heap pressure threshold -->
+                <div style="margin-top:10px;">
+                    <label for="pb-heap-threshold" style="font-size:0.85rem;">
+                        Heap pressure threshold: <b id="pb-heap-threshold-val">80%</b>
+                    </label>
+                    <input type="range" id="pb-heap-threshold" min="50" max="95" step="5"
+                           class="text_pole" style="width:100%; margin-top:2px;" />
+                </div>
+            </div>
         </div>
 
-        <button id="pb-redetect-btn" class="menu_button" style="margin-top:8px; font-size:0.8rem;">
-            Re-detect Device
-        </button>
+        <!-- ════════════════════════════════════════════════════
+             Section: Optimizations  (collapsible)
+             ════════════════════════════════════════════════════ -->
+        <div class="pb-section" data-pb-section="optimizations">
+            <button type="button" class="pb-section-header" aria-expanded="true">
+                <span class="pb-section-title">Optimizations</span>
+                <span class="pb-section-arrow">▾</span>
+            </button>
 
-        <!-- Optimizations -->
-        <div class="pb-section-title" style="margin-top:14px;">Optimizations</div>
+            <div class="pb-section-body">
+                <label class="checkbox_label" for="pb-virtual-scroll"
+                       title="Use content-visibility CSS and IntersectionObserver to skip rendering off-screen messages">
+                    <input type="checkbox" id="pb-virtual-scroll" />
+                    <span>Virtual Scrolling</span>
+                </label>
+                <small style="display:block; opacity:0.6; margin: 2px 0 6px 24px;">
+                    Skips layout/paint for messages outside the viewport. Biggest perf win.
+                </small>
 
-        <label class="checkbox_label" for="pb-virtual-scroll"
-               title="Use content-visibility CSS and IntersectionObserver to skip rendering off-screen messages">
-            <input type="checkbox" id="pb-virtual-scroll" />
-            <span>Virtual Scrolling</span>
-        </label>
-        <small style="display:block; opacity:0.6; margin: 2px 0 6px 24px;">
-            Skips layout/paint for messages outside the viewport. Biggest perf win.
-        </small>
+                <label class="checkbox_label" for="pb-aggressive-mode"
+                       title="Low-end mode: hide content of messages far above the fold (extra savings)">
+                    <input type="checkbox" id="pb-aggressive-mode" />
+                    <span>Aggressive mode <small style="opacity:0.6;">(auto-enabled for LOW tier)</small></span>
+                </label>
 
-        <label class="checkbox_label" for="pb-aggressive-mode"
-               title="Low-end mode: hide content of messages far above the fold (extra savings)">
-            <input type="checkbox" id="pb-aggressive-mode" />
-            <span>Aggressive mode <small style="opacity:0.6;">(auto-enabled for LOW tier)</small></span>
-        </label>
+                <label class="checkbox_label" for="pb-lazy-images" style="margin-top:6px;"
+                       title="Defer loading of character avatars and expression images until visible">
+                    <input type="checkbox" id="pb-lazy-images" />
+                    <span>Lazy Image Loading</span>
+                </label>
 
-        <label class="checkbox_label" for="pb-lazy-images" style="margin-top:6px;"
-               title="Defer loading of character avatars and expression images until visible">
-            <input type="checkbox" id="pb-lazy-images" />
-            <span>Lazy Image Loading</span>
-        </label>
+                <label class="checkbox_label" for="pb-scroll-optimizer" style="margin-top:6px;"
+                       title="Passive scroll listeners and RAF throttling">
+                    <input type="checkbox" id="pb-scroll-optimizer" />
+                    <span>Scroll Optimizer</span>
+                </label>
 
-        <label class="checkbox_label" for="pb-scroll-optimizer" style="margin-top:6px;"
-               title="Passive scroll listeners and RAF throttling">
-            <input type="checkbox" id="pb-scroll-optimizer" />
-            <span>Scroll Optimizer</span>
-        </label>
+                <label class="checkbox_label" for="pb-reduce-animations" style="margin-top:6px;"
+                       title="Disable CSS transitions and animations (auto-enabled for LOW tier)">
+                    <input type="checkbox" id="pb-reduce-animations" />
+                    <span>Reduce Animations</span>
+                </label>
 
-        <label class="checkbox_label" for="pb-reduce-animations" style="margin-top:6px;"
-               title="Disable CSS transitions and animations (auto-enabled for LOW tier)">
-            <input type="checkbox" id="pb-reduce-animations" />
-            <span>Reduce Animations</span>
-        </label>
-
-        <label class="checkbox_label" for="pb-memory-monitor" style="margin-top:6px;"
-               title="Watch JS heap usage and message count; escalate virtual scrolling under pressure">
-            <input type="checkbox" id="pb-memory-monitor" />
-            <span>Memory Monitor</span>
-        </label>
-        <small style="display:block; opacity:0.6; margin: 2px 0 6px 24px;">
-            Triggers aggressive virtual scroll when memory is tight. Chrome/Edge only for heap stats.
-        </small>
+                <!-- Animation sub-options (only meaningful when Reduce Animations is on) -->
+                <div id="pb-anim-suboptions" style="margin: 4px 0 6px 24px;">
+                    <label class="checkbox_label" for="pb-disable-blur"
+                           title="Remove blur / backdrop-filter effects (expensive on mobile GPUs)">
+                        <input type="checkbox" id="pb-disable-blur" />
+                        <span><small>Disable blur effects</small></span>
+                    </label>
+                    <label class="checkbox_label" for="pb-disable-shadows"
+                           title="Remove box/text shadows">
+                        <input type="checkbox" id="pb-disable-shadows" />
+                        <span><small>Disable shadows</small></span>
+                    </label>
+                    <label class="checkbox_label" for="pb-disable-transitions"
+                           title="Remove all CSS transitions">
+                        <input type="checkbox" id="pb-disable-transitions" />
+                        <span><small>Disable transitions</small></span>
+                    </label>
+                </div>
+            </div>
+        </div>
 
     </div><!-- /extension_content -->
 </div><!-- /pb-settings-panel -->

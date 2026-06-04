@@ -118,13 +118,112 @@ body.pb-show-hud #pb-hud {
     padding: 8px 0;
 }
 
+/* ── Collapsible dropdown sections ───────────────────────── */
+#pb-settings-panel .pb-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 4px;
+}
+
+#pb-settings-panel .pb-section-header {
+    display:        flex;
+    align-items:    center;
+    justify-content: space-between;
+    width:          100%;
+    padding:        8px 2px;
+    background:     none;
+    border:        none;
+    cursor:        pointer;
+    color:         inherit;
+    text-align:    left;
+}
+
+#pb-settings-panel .pb-section-header:hover .pb-section-title {
+    opacity: 0.9;
+}
+
 #pb-settings-panel .pb-section-title {
     font-size:   0.8rem;
     font-weight: 700;
     opacity:     0.6;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin: 12px 0 6px;
+}
+
+#pb-settings-panel .pb-section-arrow {
+    font-size:  0.75rem;
+    opacity:    0.5;
+    transition: transform 0.18s ease;
+}
+
+#pb-settings-panel .pb-section.pb-collapsed .pb-section-arrow {
+    transform: rotate(-90deg);
+}
+
+#pb-settings-panel .pb-section-body {
+    overflow:    hidden;
+    padding:     2px 2px 10px;
+    max-height:  1000px;
+    transition:  max-height 0.25s ease, opacity 0.2s ease;
+}
+
+#pb-settings-panel .pb-section.pb-collapsed .pb-section-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity:    0;
+}
+
+/* ── Disabled sub-option group ───────────────────────────── */
+#pb-anim-suboptions.pb-disabled {
+    opacity:        0.4;
+    pointer-events: none;
+}
+
+/* ── Live RAM monitor ────────────────────────────────────── */
+#pb-ram-monitor {
+    background:    rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    padding:      8px 10px;
+    margin:       4px 0 4px;
+    font-size:    0.8rem;
+}
+
+.pb-ram-row {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+}
+
+.pb-ram-label  { opacity: 0.65; }
+.pb-ram-value  { font-family: monospace; font-weight: 600; }
+
+.pb-ram-bar {
+    position:      relative;
+    height:        8px;
+    margin-top:    6px;
+    border-radius: 4px;
+    background:    rgba(255, 255, 255, 0.1);
+    overflow:      hidden;
+}
+
+#pb-ram-bar-fill {
+    height:        100%;
+    width:         0%;
+    border-radius: 4px;
+    transition:    width 0.4s ease, background-color 0.3s ease;
+}
+
+#pb-ram-bar-fill.pb-ram-ok     { background: #2ecc71; }
+#pb-ram-bar-fill.pb-ram-warn   { background: #e67e22; }
+#pb-ram-bar-fill.pb-ram-danger { background: #e74c3c; }
+
+#pb-ram-threshold-marker {
+    position:   absolute;
+    top:        -1px;
+    width:      2px;
+    height:     10px;
+    background: rgba(255, 255, 255, 0.7);
+    transform:  translateX(-1px);
 }
 
 #pb-device-info {
