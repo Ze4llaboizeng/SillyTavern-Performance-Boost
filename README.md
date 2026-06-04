@@ -1,13 +1,37 @@
-# SillyTavern Performance Boost
-Optimizes SillyTavern for mobile and low-end devices by improving memory management, image loading, and scrolling performance dynamically based on your device profile.
+readme_content = """# ⚡ SillyTavern Performance Boost
 
-## Features
-- **Smart Device Detection**: Automatically adjusts settings based on CPU, RAM, and FPS constraints.
-- **Message Virtualization**: Drastically reduces DOM rendering cost for long chats.
-- **Lazy Load Images**: Defers avatar and expression loading.
-- **Memory Manager**: Failsafe protection against browser crashes in long RP sessions.
+**SillyTavern Performance Boost** เป็นส่วนขยาย (Extension) สำหรับ SillyTavern ที่ถูกออกแบบมาเพื่อเพิ่มประสิทธิภาพการทำงานและลดภาระการประมวลผลบนอุปกรณ์พกพา (Mobile) รวมถึงเครื่องคอมพิวเตอร์สเปกต่ำ (Low-end Devices) โดยจะเน้นไปที่การจัดการหน่วยความจำ, การเพิ่มความเร็วในการเรนเดอร์ข้อความแชต, การโหลดรูปภาพแบบอัจฉริยะ และการควบคุมทรัพยากรระบบไม่ให้เบราว์เซอร์เกิดอาการค้างหรือแครช (Crash) ในระหว่างการทำ Roleplay ระยะยาว
 
-## Installation
-1. Go to SillyTavern -> Extensions
-2. Install from URL: `https://github.com/Ze4llaboizeng/sillytavern-performance-boost`
-3. The extension will auto-detect your device on the first run.
+---
+
+## 🚀 คุณสมบัติเด่น (Features)
+
+### 1. ระบบตรวจจับข้อมูลอุปกรณ์อัตโนมัติ (Device Profiler)
+* **การวิเคราะห์อัจฉริยะ**: ตรวจสอบความจุ RAM, จำนวนคอร์ของ CPU, ประเภทอุปกรณ์ (Mobile/Desktop) และทดสอบประสิทธิภาพการเรนเดอร์กราฟิก (FPS) ในช่วงเริ่มต้น
+* **การปรับระดับอัตโนมัติ (Tier Allocation)**: แบ่งระดับอุปกรณ์ออกเป็น 3 ระดับ ได้แก่ **Low (🔴 สเปกต่ำ)**, **Medium (🟡 สเปกกลาง)**, และ **High (🟢 สเปกสูง)** พร้อมเปิด/ปิดฟังก์ชันที่เหมาะสมให้ทันทีโดยที่ผู้ใช้ไม่ต้องตั้งค่าเอง
+
+### 2. การจำลองการเลื่อนข้อความขั้นสูง (Message Virtualization)
+* **สองเลเยอร์การป้องกัน**: 
+  * **Layer 1 (Native CSS)**: ใช้คุณสมบัติ `content-visibility: auto` เพื่อบอกให้เบราว์เซอร์ข้ามการประมวลผล (Layout และ Paint) ของข้อความแชตที่ยังไม่ถูกเลื่อนมาแสดงผลบนหน้าจอ (ลดต้นทุนสไตล์เรนเดอร์เหลือ 0)
+  * **Layer 2 (IntersectionObserver)**: สำหรับอุปกรณ์ระดับสเปกต่ำ (Low Tier) ระบบจะเปิดใช้งานโหมดดุดัน (Aggressive Mode) โดยใช้ JavaScript ตรวจสอบระยะห่าง หากข้อความอยู่ห่างจากหน้าจอเกิน 2 เท่าของความสูง Viewport จะถูกซ่อนด้วย `content-visibility: hidden` ทันที เพื่อประหยัด Render Budget
+* **ปลอดภัยต่อสคริปต์อื่น**: รักษาโครงสร้าง DOM ของแชตไว้ครบถ้วน ทำให้ Event Handlers ของ jQuery (ปุ่ม Edit, Regen, Copy) ของ SillyTavern ไม่พังหรือใช้งานไม่ได้เหมือนระบบลบ Node ทั่วไป
+
+### 3. ระบบโหลดรูปภาพอัจฉริยะ (Lazy Image Loading)
+* **ชะลอการโหลดภาพขนาดใหญ่**: ภาพโปรไฟล์ตัวละคร (Avatars) และภาพแสดงอารมณ์สไปรท์ (Expression Sprites) ที่ปกติมีขนาดใหญ่และกินแรม จะถูกแทนที่ด้วยภาพ Placeholder ชั่วคราว และจะโหลดภาพจริงก็ต่อเมื่อรูปภาพนั้นกำลังจะเลื่อนเข้ามาในหน้าจอในระยะ 150px เท่านั้น
+* **ฮินท์ระดับเบราว์เซอร์**: เพิ่มแอตทริบิวต์ `loading="lazy"` และ `decoding="async"` บนแท็กอิมเมจทั้งหมดโดยอัตโนมัติ
+
+### 4. ระบบปรับปรุงการเลื่อนหน้าจอ (Scroll Optimizer)
+* **ลดการ Recalc สไตล์**: ในระหว่างที่ผู้ใช้กำลังทำการเลื่อนหน้าจออย่างรวดเร็ว ระบบจะทำการเปิดใช้งานคลาสพิเศษเพื่อสั่ง `pointer-events: none` บนข้อความแชตทั้งหมด ป้องกันไม่ให้เกิดการคำนวณเอฟเฟกต์ Hover ที่ไม่จำเป็น
+* **Throttling ด้วย rAF**: จัดระเบียบ Event Listener ของการเลื่อนหน้าจอด้วย `requestAnimationFrame` ร่วมกับคุณสมบัติแบบ `passive: true` เพื่อไม่ให้บล็อก Thread หลักของการแสดงผล
+
+### 5. ระบบควบคุมแอนิเมชันและเอฟเฟกต์กราฟิก (Animation Reducer)
+* **ลดภาระ GPU**: บนอุปกรณ์สเปกต่ำ ระบบจะบังคับปิดเอฟเฟกต์ที่กินพลังงานการประมวลผลสูง เช่น เอฟเฟกต์กระจกเบลอ (`backdrop-filter`), เงาข้อความและกล่อง (`text-shadow`/`box-shadow`)
+* **ตัดความหน่วงของทรานซิชัน**: ปรับเปลี่ยนเวลาในการทำแอนิเมชันและทรานซิชันต่างๆ ของ UI ให้กลายเป็น 0.01ms เพื่อให้การตอบสนองของหน้าจอทำได้ฉับไวที่สุด และลดอาการหน่วง
+
+### 6. ระบบเฝ้าระวังหน่วยความจำ (Memory Manager)
+* **เฝ้าระวัง JS Heap**: คอยตรวจสอบหน่วยความจำจาวาสคริปต์ (เฉพาะบน Chrome, Edge และเบราว์เซอร์ตระกูล Chromium) รวมถึงคอยนับจำนวนข้อความแชตที่ถูกเรนเดอร์อยู่จริง
+* **ยกระดับการป้องกันอัตโนมัติ**: เมื่อพบว่าหน่วยความจำถูกใช้งานเกิน 80% หรือข้อความแชตมีจำนวนมากกว่า 500 ข้อความ ระบบจะทำการเปิดใช้งานโหมด Virtualization แบบดุดันโดยอัตโนมัติ และแจ้งเตือนผู้ใช้ผ่านระบบ Toastr Notification ของ SillyTavern เพื่อป้องกันแอปพลิเคชันปิดตัวเอง
+
+---
+
+## 📁 โครงสร้างโฟลเดอร์ของโปรเจกต์ (Project Structure)
