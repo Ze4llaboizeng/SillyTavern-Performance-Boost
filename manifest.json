@@ -7,6 +7,6 @@
     "author": "Zealllll",
     "homepage": "https://github.com/Ze4llaboizeng/SillyTavern-Performance-Boost",
     "tags": ["performance", "mobile", "optimization"],
-    "auto_update": true,
+    "settings": "settings.html",
     "requires": []
 }
