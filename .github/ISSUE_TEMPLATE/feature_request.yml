@@ -1,0 +1,42 @@
+name: "💡 Feature Request"
+description: Suggest a new optimization or improvement (เสนอแนะไอเดียหรือฟีเจอร์ใหม่)
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: ปัญหาด้านประสิทธิภาพด้านใดที่คุณพบเจอ และอยากให้ฟีเจอร์นี้เข้ามาช่วยแก้ไข?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: อธิบายแนวคิดหรือวิธีการทำงานของฟีเจอร์ที่คุณอยากให้เพิ่มเข้ามา
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: แนวทางอื่นๆ ที่คุณเคยคิดหรือลองใช้แก้ไขปัญหานี้มาก่อน (ถ้ามี)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target device tier
+      description: ฟีเจอร์นี้เหมาะสำหรับกลุ่มผู้ใช้งานอุปกรณ์ระดับใด (เลือกได้มากกว่า 1 ข้อ)
+      multiple: true
+      options:
+        - Low (≤1 GB)
+        - Medium (2–3 GB)
+        - High (4+ GB)
+        - All tiers
+    validations:
+      required: false
