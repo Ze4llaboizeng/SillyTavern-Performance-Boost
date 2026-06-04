@@ -1,0 +1,12 @@
+{
+    "display_name": "Performance Boost",
+    "version": "0.0.1",
+    "description": "Optimizes SillyTavern for mobile devices — virtual scrolling, lazy images, memory management, and automatic device profiling for both low-end and high-end phones.",
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Zealllll",
+    "homepage": "https://github.com/Ze4llaboizeng/sillytavern-performance-boost",
+    "tags": ["performance", "mobile", "optimization"],
+    "auto_update": true,
+    "requires": []
+}
