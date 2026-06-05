@@ -269,8 +269,12 @@ body.pb-show-hud #pb-hud {
     inset:           0;
     z-index:         10050;
     display:         flex;
-    align-items:     center;
     justify-content: center;
+    /* The overlay itself scrolls. Combined with `margin: auto` on the modal
+       this keeps the dialog centered when it fits, but lets you reach the
+       top of the dialog on short/mobile screens instead of clipping it. */
+    overflow-y:      auto;
+    -webkit-overflow-scrolling: touch;
     padding:         16px;
     background:      rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(2px);
@@ -279,8 +283,9 @@ body.pb-show-hud #pb-hud {
 #pb-boost-modal {
     position:      relative;
     width:         min(440px, 100%);
-    max-height:    90vh;
-    overflow-y:    auto;
+    /* Vertically center when there's room; auto margins also act as the
+       scroll gutters when the dialog is taller than the viewport. */
+    margin:        auto;
     padding:       20px 22px 18px;
     border-radius: 10px;
     background:    var(--SmartThemeBlurTintColor, #2b2b33);
@@ -365,4 +370,30 @@ body.pb-show-hud #pb-hud {
     justify-content: space-between;
     gap:             10px;
     margin-top:      16px;
+    flex-wrap:       wrap;   /* don't overflow on narrow phones */
+}
+
+/* ── Phone-sized screens ─────────────────────────────────────
+   Drop the centered padding and trim inner spacing so the
+   dialog uses the available width without bleeding off-screen.
+ ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    #pb-boost-overlay {
+        padding: 10px;
+        /* Pin to the top so the title is visible immediately on tall content. */
+        align-items: flex-start;
+    }
+
+    #pb-boost-modal {
+        width:   100%;
+        margin:  auto;
+        padding: 16px 16px 14px;
+    }
+
+    .pb-boost-cmd-row {
+        flex-direction: column;   /* stack the command above its copy button */
+        align-items:    stretch;
+    }
+
+    #pb-boost-copy { align-self: flex-end; }
 }
