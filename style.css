@@ -269,13 +269,14 @@ body.pb-show-hud #pb-hud {
     inset:           0;
     z-index:         10050;
     display:         flex;
+    align-items:     center;
     justify-content: center;
-    /* The overlay itself scrolls. Combined with `margin: auto` on the modal
-       this keeps the dialog centered when it fits, but lets you reach the
-       top of the dialog on short/mobile screens instead of clipping it. */
-    overflow-y:      auto;
-    -webkit-overflow-scrolling: touch;
+    /* Use the *small* dynamic viewport so the mobile address bar can't push
+       the dialog off-screen. Falls back to vh on older browsers. */
+    height:          100vh;
+    height:          100svh;
     padding:         16px;
+    box-sizing:      border-box;
     background:      rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(2px);
 }
@@ -283,9 +284,12 @@ body.pb-show-hud #pb-hud {
 #pb-boost-modal {
     position:      relative;
     width:         min(440px, 100%);
-    /* Vertically center when there's room; auto margins also act as the
-       scroll gutters when the dialog is taller than the viewport. */
-    margin:        auto;
+    /* Never taller than the visible area; scroll *inside* the modal instead
+       of letting it overflow the screen. */
+    max-height:    100%;
+    overflow-y:    auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding:       20px 22px 18px;
     border-radius: 10px;
     background:    var(--SmartThemeBlurTintColor, #2b2b33);
@@ -293,6 +297,7 @@ body.pb-show-hud #pb-hud {
     box-shadow:   0 12px 40px rgba(0, 0, 0, 0.5);
     border:       1px solid rgba(255, 255, 255, 0.08);
 }
+
 
 #pb-boost-modal h3 {
     margin:      0 0 12px;
@@ -386,7 +391,6 @@ body.pb-show-hud #pb-hud {
 
     #pb-boost-modal {
         width:   100%;
-        margin:  auto;
         padding: 16px 16px 14px;
     }
 
