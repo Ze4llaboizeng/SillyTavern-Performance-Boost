@@ -1,167 +1,225 @@
-<!-- Performance Boost — Settings Panel
-     Injected into SillyTavern's #extensions_settings container -->
-
-<div id="pb-settings-panel" class="extension_container">
-    <div class="extension_header">
-        <div class="extension_header_title">
-            <b>⚡ Performance Boost</b>
+<div id="pb-settings-panel" class="pb-settings-panel">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>
+                <span class="fa-solid fa-bolt"></span>
+                Performance Boost
+                <span id="pb-tier-chip" class="pb-tier-chip" hidden></span>
+            </b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
-        <div class="extension_header_toggle">
+        <div class="inline-drawer-content">
+
             <label class="checkbox_label" for="pb-enabled" title="Enable/Disable the extension">
                 <input type="checkbox" id="pb-enabled" />
-                <span>Enable</span>
+                <span>Enable Performance Boost</span>
             </label>
-        </div>
-    </div>
 
-    <div class="extension_content" id="pb-settings-content">
-
-        <!-- ════════════════════════════════════════════════════
-             Section: Device Profile  (collapsible)
-             ════════════════════════════════════════════════════ -->
-        <div class="pb-section" data-pb-section="device">
-            <button type="button" class="pb-section-header" aria-expanded="true">
-                <span class="pb-section-title">Device Profile</span>
-                <span class="pb-section-arrow">▾</span>
-            </button>
-
-            <div class="pb-section-body">
-                <!-- Device Info Banner -->
-                <div id="pb-device-info">
-                    <span id="pb-device-info-text">Detecting device…</span>
+            <div class="flex-container flexGap10 marginTop10 pb-quick-actions">
+                <div id="pb-phone-saver-btn" class="menu_button menu_button_icon pb-action-primary"
+                     title="One-tap low-RAM phone profile: Fast UI, low streaming FPS, aggressive virtual scroll, image detach, freeze backgrounds">
+                    <span>📱 Phone Saver</span>
                 </div>
+                <div id="pb-apply-st-hints-btn" class="menu_button menu_button_icon"
+                     title="Apply SillyTavern official perf tips (No Blur / Fast UI, Reduced motion, Streaming FPS, # Messages to Load)">
+                    <span>⚙️ Apply ST Tips</span>
+                </div>
+                <div id="pb-force-clean-btn" class="menu_button menu_button_icon"
+                     title="Detach far-off images now and escalate virtual scroll">
+                    <span>🧹 Clean Now</span>
+                </div>
+            </div>
+            <small class="pb-quick-hint">
+                Phone Saver = Fast UI + streaming ~12 FPS + load ~40 msgs + aggressive virtual scroll + detach far images.
+            </small>
 
-                <label class="checkbox_label" for="pb-auto-detect" title="Automatically detect device and apply best settings">
-                    <input type="checkbox" id="pb-auto-detect" />
-                    <span>Auto-detect device tier</span>
-                </label>
+            <!-- Device Profile -->
+            <div class="inline-drawer wide100p">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <b>Device Profile</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <div id="pb-device-info" class="pb-device-info">
+                        <span id="pb-device-info-text">Detecting device…</span>
+                    </div>
 
-                <div style="margin-top:6px;">
-                    <label for="pb-device-tier" style="font-size:0.85rem;">Manual tier override:</label>
-                    <select id="pb-device-tier" class="text_pole" style="margin-left:6px; width:auto;">
+                    <label class="checkbox_label" for="pb-auto-detect" title="Automatically detect device and apply best settings">
+                        <input type="checkbox" id="pb-auto-detect" />
+                        <span>Auto-detect device tier</span>
+                    </label>
+
+                    <label for="pb-device-tier">Manual tier</label>
+                    <select id="pb-device-tier" class="text_pole">
                         <option value="auto">Auto (recommended)</option>
                         <option value="low">🔴 Low (ล่างสุด)</option>
                         <option value="medium">🟡 Medium (กลาง ๆ)</option>
                         <option value="good">🔵 Good (พอใช้ได้)</option>
                         <option value="high">🟢 High (ยอดเยี่ยม)</option>
                     </select>
-                </div>
 
-                <button id="pb-redetect-btn" class="menu_button" style="margin-top:8px; font-size:0.8rem;">
-                    Re-detect Device
-                </button>
-            </div>
-        </div>
-
-        <!-- ════════════════════════════════════════════════════
-             Section: Memory Monitor  (collapsible) — live RAM usage
-             ════════════════════════════════════════════════════ -->
-        <div class="pb-section" data-pb-section="memory">
-            <button type="button" class="pb-section-header" aria-expanded="true">
-                <span class="pb-section-title">Memory Monitor</span>
-                <span class="pb-section-arrow">▾</span>
-            </button>
-
-            <div class="pb-section-body">
-                <label class="checkbox_label" for="pb-memory-monitor"
-                       title="Watch JS heap usage and message count; escalate virtual scrolling under pressure">
-                    <input type="checkbox" id="pb-memory-monitor" />
-                    <span>Enable Memory Monitor</span>
-                </label>
-                <small style="display:block; opacity:0.6; margin: 2px 0 8px 24px;">
-                    Triggers aggressive virtual scroll when memory is tight.
-                </small>
-
-                <!-- Live RAM usage display -->
-                <div id="pb-ram-monitor">
-                    <div class="pb-ram-row">
-                        <span class="pb-ram-label">JS Heap</span>
-                        <span id="pb-ram-heap-text" class="pb-ram-value">measuring…</span>
-                    </div>
-                    <div class="pb-ram-bar">
-                        <div id="pb-ram-bar-fill"></div>
-                        <div id="pb-ram-threshold-marker"></div>
-                    </div>
-                    <div class="pb-ram-row" style="margin-top:6px;">
-                        <span class="pb-ram-label">Messages rendered</span>
-                        <span id="pb-ram-msg-count" class="pb-ram-value">—</span>
+                    <div id="pb-redetect-btn" class="menu_button menu_button_icon marginTop10">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Re-detect Device</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Heap pressure threshold -->
-                <div style="margin-top:10px;">
-                    <label for="pb-heap-threshold" style="font-size:0.85rem;">
-                        Heap pressure threshold: <b id="pb-heap-threshold-val">80%</b>
+            <!-- Memory Monitor -->
+            <div class="inline-drawer wide100p">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <b>Memory Monitor</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <label class="checkbox_label" for="pb-memory-monitor"
+                           title="Watch JS heap usage and message count; escalate virtual scrolling under pressure">
+                        <input type="checkbox" id="pb-memory-monitor" />
+                        <span>Enable Memory Monitor</span>
                     </label>
-                    <input type="range" id="pb-heap-threshold" min="50" max="95" step="5"
-                           class="text_pole" style="width:100%; margin-top:2px;" />
+                    <small class="pb-help">
+                        Triggers aggressive virtual scroll + image detach when memory is tight.
+                    </small>
+
+                    <div id="pb-ram-monitor" class="pb-ram-monitor">
+                        <div class="pb-ram-row">
+                            <span class="pb-ram-label">JS Heap</span>
+                            <span id="pb-ram-heap-text" class="pb-ram-value">measuring…</span>
+                        </div>
+                        <div class="pb-ram-bar">
+                            <div id="pb-ram-bar-fill"></div>
+                            <div id="pb-ram-threshold-marker"></div>
+                        </div>
+                        <div class="pb-ram-row pb-ram-row-gap">
+                            <span class="pb-ram-label">Messages rendered</span>
+                            <span id="pb-ram-msg-count" class="pb-ram-value">—</span>
+                        </div>
+                    </div>
+
+                    <label for="pb-heap-threshold">
+                        Heap pressure threshold: <b id="pb-heap-threshold-val">75%</b>
+                    </label>
+                    <input type="range" id="pb-heap-threshold" min="50" max="95" step="5" class="neo-range-slider" />
+
+                    <label for="pb-msg-threshold">
+                        Message-count trigger: <b id="pb-msg-threshold-val">300</b>
+                    </label>
+                    <input type="range" id="pb-msg-threshold" min="50" max="1000" step="50" class="neo-range-slider" />
+                    <small class="pb-help">Escalate when this many .mes nodes are in the DOM.</small>
                 </div>
             </div>
-        </div>
 
-        <!-- ════════════════════════════════════════════════════
-             Section: Optimizations  (collapsible)
-             ════════════════════════════════════════════════════ -->
-        <div class="pb-section" data-pb-section="optimizations">
-            <button type="button" class="pb-section-header" aria-expanded="true">
-                <span class="pb-section-title">Optimizations</span>
-                <span class="pb-section-arrow">▾</span>
-            </button>
-
-            <div class="pb-section-body">
-                <label class="checkbox_label" for="pb-virtual-scroll"
-                       title="Use content-visibility CSS and IntersectionObserver to skip rendering off-screen messages">
-                    <input type="checkbox" id="pb-virtual-scroll" />
-                    <span>Virtual Scrolling</span>
-                </label>
-                <small style="display:block; opacity:0.6; margin: 2px 0 6px 24px;">
-                    Skips layout/paint for messages outside the viewport. Biggest perf win.
-                </small>
-
-                <label class="checkbox_label" for="pb-aggressive-mode"
-                       title="Low-end mode: hide content of messages far above the fold (extra savings)">
-                    <input type="checkbox" id="pb-aggressive-mode" />
-                    <span>Aggressive mode <small style="opacity:0.6;">(auto-enabled for LOW tier)</small></span>
-                </label>
-
-                <label class="checkbox_label" for="pb-lazy-images" style="margin-top:6px;"
-                       title="Defer loading of character avatars and expression images until visible">
-                    <input type="checkbox" id="pb-lazy-images" />
-                    <span>Lazy Image Loading</span>
-                </label>
-
-                <label class="checkbox_label" for="pb-scroll-optimizer" style="margin-top:6px;"
-                       title="Passive scroll listeners and RAF throttling">
-                    <input type="checkbox" id="pb-scroll-optimizer" />
-                    <span>Scroll Optimizer</span>
-                </label>
-
-                <label class="checkbox_label" for="pb-reduce-animations" style="margin-top:6px;"
-                       title="Disable CSS transitions and animations (auto-enabled for LOW tier)">
-                    <input type="checkbox" id="pb-reduce-animations" />
-                    <span>Reduce Animations</span>
-                </label>
-
-                <!-- Animation sub-options (only meaningful when Reduce Animations is on) -->
-                <div id="pb-anim-suboptions" style="margin: 4px 0 6px 24px;">
-                    <label class="checkbox_label" for="pb-disable-blur"
-                           title="Remove blur / backdrop-filter effects (expensive on mobile GPUs)">
-                        <input type="checkbox" id="pb-disable-blur" />
-                        <span><small>Disable blur effects</small></span>
+            <!-- Optimizations -->
+            <div class="inline-drawer wide100p">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <b>Optimizations</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <label class="checkbox_label" for="pb-st-core-hints"
+                           title="Apply ST built-in knobs: Fast UI, reduced motion, streaming FPS, chat truncation">
+                        <input type="checkbox" id="pb-st-core-hints" />
+                        <span>ST Core Hints <small class="pb-muted">(Fast UI / FPS / truncation)</small></span>
                     </label>
-                    <label class="checkbox_label" for="pb-disable-shadows"
-                           title="Remove box/text shadows">
-                        <input type="checkbox" id="pb-disable-shadows" />
-                        <span><small>Disable shadows</small></span>
+                    <small class="pb-help">
+                        Official FAQ tips: No Blur Effect, Reduced motion, Streaming FPS 10–15, # Messages to Load.
+                    </small>
+
+                    <label class="checkbox_label" for="pb-virtual-scroll"
+                           title="Use content-visibility CSS and IntersectionObserver to skip rendering off-screen messages">
+                        <input type="checkbox" id="pb-virtual-scroll" />
+                        <span>Virtual Scrolling</span>
                     </label>
-                    <label class="checkbox_label" for="pb-disable-transitions"
-                           title="Remove all CSS transitions">
-                        <input type="checkbox" id="pb-disable-transitions" />
-                        <span><small>Disable transitions</small></span>
+                    <small class="pb-help">Skips layout/paint for messages outside the viewport.</small>
+
+                    <label class="checkbox_label" for="pb-aggressive-mode"
+                           title="Low-end mode: hide content of messages far above the fold">
+                        <input type="checkbox" id="pb-aggressive-mode" />
+                        <span>Aggressive mode <small class="pb-muted">(auto for LOW)</small></span>
                     </label>
+
+                    <label class="checkbox_label" for="pb-lazy-images"
+                           title="Defer loading of character avatars and expression images until visible">
+                        <input type="checkbox" id="pb-lazy-images" />
+                        <span>Lazy Image Loading</span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-dom-janitor"
+                           title="Detach decoded bitmaps of far-off images to free RAM; optional collapse of old media">
+                        <input type="checkbox" id="pb-dom-janitor" />
+                        <span>DOM Janitor <small class="pb-muted">(detach far images)</small></span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-collapse-media"
+                           title="Collapse media blocks in older messages beyond the keep window">
+                        <input type="checkbox" id="pb-collapse-media" />
+                        <span>Collapse old media</span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-scroll-optimizer"
+                           title="Passive scroll listeners and RAF throttling">
+                        <input type="checkbox" id="pb-scroll-optimizer" />
+                        <span>Scroll Optimizer</span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-idle-guard"
+                           title="Pause polling when tab is hidden; freeze backgrounds on low battery">
+                        <input type="checkbox" id="pb-idle-guard" />
+                        <span>Idle / Battery Guard</span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-freeze-bg"
+                           title="Disable animated backgrounds and filters (big GPU save on phones)">
+                        <input type="checkbox" id="pb-freeze-bg" />
+                        <span>Freeze backgrounds</span>
+                    </label>
+
+                    <label class="checkbox_label" for="pb-reduce-animations"
+                           title="Disable CSS transitions and animations (auto-enabled for LOW tier)">
+                        <input type="checkbox" id="pb-reduce-animations" />
+                        <span>Reduce Animations</span>
+                    </label>
+
+                    <div id="pb-anim-suboptions" class="pb-suboptions">
+                        <label class="checkbox_label" for="pb-disable-blur"
+                               title="Remove blur / backdrop-filter effects (expensive on mobile GPUs)">
+                            <input type="checkbox" id="pb-disable-blur" />
+                            <span><small>Disable blur effects</small></span>
+                        </label>
+                        <label class="checkbox_label" for="pb-disable-shadows"
+                               title="Remove box/text shadows">
+                            <input type="checkbox" id="pb-disable-shadows" />
+                            <span><small>Disable shadows</small></span>
+                        </label>
+                        <label class="checkbox_label" for="pb-disable-transitions"
+                               title="Remove all CSS transitions">
+                            <input type="checkbox" id="pb-disable-transitions" />
+                            <span><small>Disable transitions</small></span>
+                        </label>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </div><!-- /extension_content -->
-</div><!-- /pb-settings-panel -->
+            <!-- Tips -->
+            <div class="inline-drawer wide100p">
+                <div class="inline-drawer-toggle inline-drawer-header">
+                    <b>Tips (ST official + mobile)</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <ul class="pb-tips-list">
+                        <li><b>No Blur / Fast UI</b> — User Settings → biggest jitter fix (ST FAQ).</li>
+                        <li><b>Reduced motion</b> — UI theme settings; kill cosmetic animations.</li>
+                        <li><b>Streaming FPS 10–15</b> — lower = less paint while AI types.</li>
+                        <li><b># Messages to Load</b> — paginate history (e.g. 40–80 on phones).</li>
+                        <li><b>Hardware Acceleration</b> — enable in the browser.</li>
+                        <li><b>Disable heavy extensions</b> — Live2D / VRM / talkinghead / big regex.</li>
+                        <li><b>Termux host</b> — <code>performance.lazyLoadCharacters: true</code>, <code>useDiskCache: false</code> in config.yaml.</li>
+                        <li><b>Remote ST</b> — run ST on PC/server; open the UI in the phone browser.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

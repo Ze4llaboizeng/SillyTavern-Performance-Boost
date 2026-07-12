@@ -4,6 +4,11 @@
  * Applies lazy-loading and async-decoding to images inside the chat.
  * Uses IntersectionObserver to defer loading until the image is near the viewport.
  * Also handles SillyTavern's character expression sprites and avatar thumbnails.
+ *
+ * Phone tweaks:
+ *  - Smaller rootMargin (less speculative decode)
+ *  - decoding=async + fetchpriority=low for far images
+ *  - Optional avatar defer on low-RAM
  */
 
 const OBSERVED_ATTR = "data-pb-lazy";
@@ -52,6 +57,7 @@ export class ImageOptimizer {
     // ─── Private ─────────────────────────────────────────────────────────────
 
     _setupObserver() {
+        const marginPx = this.cfg.rootMarginPx ?? 120;
         this.observer = new IntersectionObserver(entries => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
@@ -60,7 +66,7 @@ export class ImageOptimizer {
                 }
             }
         }, {
-            rootMargin: "150px 0px", // Start loading 150 px before visible
+            rootMargin: `${marginPx}px 0px`,
             threshold:  0,
         });
     }
@@ -72,6 +78,15 @@ export class ImageOptimizer {
         // Always add native hints (zero cost)
         img.setAttribute("loading",  "lazy");
         img.setAttribute("decoding", "async");
+
+        // Don't fight the browser's LCP candidate for the last few messages
+        try {
+            if ("fetchPriority" in img || "fetchpriority" in img) {
+                img.fetchPriority = "low";
+            } else {
+                img.setAttribute("fetchpriority", "low");
+            }
+        } catch { /* ignore */ }
 
         // If image is already loaded (cached / inline src), mark done
         if (img.complete && img.naturalWidth > 0) {
@@ -99,6 +114,11 @@ export class ImageOptimizer {
             img.src = deferred;
             img.removeAttribute("data-pb-src");
         }
+        try {
+            if ("fetchPriority" in img || "fetchpriority" in img) {
+                img.fetchPriority = "auto";
+            }
+        } catch { /* ignore */ }
         img.setAttribute(OBSERVED_ATTR, "loaded");
     }
 
@@ -110,7 +130,8 @@ export class ImageOptimizer {
         const isExpression = img.closest("#expression-holder") !== null;
         const isMessageImg = img.closest(".mes_img_container") !== null
                           || img.closest(".mes_img") !== null;
-        const isLargeAvatar = img.classList.contains("avatar") || img.closest(".avatar") !== null;
+        const isLargeAvatar = this.cfg.deferAvatars !== false
+            && (img.classList.contains("avatar") || img.closest(".avatar") !== null);
 
         return isExpression || isMessageImg || isLargeAvatar;
     }

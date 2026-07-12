@@ -6,13 +6,15 @@
  *
  * When memory pressure is detected, fires the supplied callback so other
  * modules can take action (e.g., activate aggressive virtual scrolling).
+ *
+ * Pauses automatically when the document is hidden (battery + CPU).
  */
 
 const LOG = "[PerfBoost:MemMon]";
 
 export class MemoryMonitor {
     /**
-     * @param {object}   cfg       — from extension_settings.memoryMonitor
+     * @param {object}   cfg       — from extension_settings.memoryManager
      * @param {Function} onPressure — (info: PressureInfo) => void
      */
     constructor(cfg = {}, onPressure = () => {}) {
@@ -21,6 +23,8 @@ export class MemoryMonitor {
         this._timer      = null;
         this._lastAlert  = 0;
         this._alertCool  = 60_000; // minimum ms between repeated alerts
+        this._paused     = false;
+        this._lastStats  = null;
     }
 
     // ─── Public API ─────────────────────────────────────────────────────────
@@ -35,42 +39,67 @@ export class MemoryMonitor {
         this._timer = null;
     }
 
+    pause() {
+        this._paused = true;
+    }
+
+    resume() {
+        this._paused = false;
+        this._check();
+    }
+
     /** Alias for compatibility with destroy() convention */
     destroy() { this.stop(); }
 
     /**
      * Returns a live snapshot of memory usage for UI display.
-     * Safe to call at any time, even when the monitor isn't running.
-     * @returns {{ supported:boolean, usedMB:number|null, limitMB:number|null, ratio:number|null, messageCount:number, threshold:number }}
+     * @returns {{ supported:boolean, usedMB:number|null, limitMB:number|null, ratio:number|null, messageCount:number, threshold:number, paused:boolean }}
      */
     getStats() {
         const heap = this._heapInfo();
-        const threshold = this.cfg.heapThreshold ?? 0.80;
-        return {
+        const threshold = this.cfg.heapThreshold ?? 0.75;
+        const stats = {
             supported:    !!heap,
             usedMB:       heap ? heap.used  / 1024 / 1024 : null,
             limitMB:      heap ? heap.limit / 1024 / 1024 : null,
             ratio:        heap ? heap.used  / heap.limit  : null,
             messageCount: this._messageCount(),
             threshold,
+            paused:       this._paused,
         };
+        this._lastStats = stats;
+        return stats;
     }
 
     // ─── Private ─────────────────────────────────────────────────────────────
 
     _check() {
+        if (this._paused) return;
+        if (this.cfg.pauseWhenHidden !== false && document.hidden) return;
+
         const heap = this._heapInfo();
         const msgs = this._messageCount();
 
         const heapPressure = heap
-            ? heap.used / heap.limit >= (this.cfg.heapThreshold ?? 0.80)
+            ? heap.used / heap.limit >= (this.cfg.heapThreshold ?? 0.75)
             : false;
 
-        const msgPressure = msgs >= (this.cfg.messageCountThreshold ?? 500);
+        const msgPressure = msgs >= (this.cfg.messageCountThreshold ?? 300);
+
+        // Cache for UI
+        this._lastStats = {
+            supported: !!heap,
+            usedMB: heap ? heap.used / 1024 / 1024 : null,
+            limitMB: heap ? heap.limit / 1024 / 1024 : null,
+            ratio: heap ? heap.used / heap.limit : null,
+            messageCount: msgs,
+            threshold: this.cfg.heapThreshold ?? 0.75,
+            paused: false,
+        };
 
         if (heapPressure || msgPressure) {
             const now = Date.now();
-            if (now - this._lastAlert < this._alertCool) return; // cooldown
+            if (now - this._lastAlert < this._alertCool) return;
             this._lastAlert = now;
 
             const info = {

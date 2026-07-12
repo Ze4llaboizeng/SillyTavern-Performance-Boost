@@ -1,31 +1,22 @@
 /* ============================================================
    SillyTavern Performance Boost — style.css
-   Tier-aware CSS that activates based on the <body> class
-   set by the extension:  pb-tier-low | pb-tier-medium | pb-tier-good | pb-tier-high
+   Tier-aware CSS + native inline-drawer settings panel
+   body classes: pb-tier-low | pb-tier-medium | pb-tier-good | pb-tier-high
    ============================================================ */
 
 /* ── Chat container baseline ─────────────────────────────── */
 #chat {
-    /* Enable hardware-accelerated scrolling on all devices */
     -webkit-overflow-scrolling: touch;
-    scroll-behavior:            auto;     /* disable smooth-scroll on mobile for speed */
+    scroll-behavior:            auto;
     overscroll-behavior:        contain;
 }
 
-/* ── Message containment hint ───────────────────────────────
-   `contain: layout style` tells the browser each message is
-   self-contained — changes inside one message don't affect
-   layout of others. This cuts style-recalc cost significantly.
- ──────────────────────────────────────────────────────────── */
+/* ── Message containment hint ─────────────────────────────── */
 #chat .mes {
-    contain:                  layout style;
-    /* content-visibility is injected by VirtualScroll.js dynamically */
+    contain: layout style;
 }
 
-/* ── Image rendering hints ──────────────────────────────────
-   image-rendering: auto is default but spell it out explicitly
-   for GPU-composited layers.
- ──────────────────────────────────────────────────────────── */
+/* ── Image rendering hints ────────────────────────────────── */
 #chat .avatar img,
 #chat .mes_img,
 #expression-holder img {
@@ -38,30 +29,44 @@
    ══════════════════════════════════════════════════════════ */
 
 body.pb-tier-low #chat .mes {
-    /* Remove paint-heavy decorations */
     backdrop-filter:         none !important;
     -webkit-backdrop-filter: none !important;
 }
 
 body.pb-tier-low #chat .mes_text {
-    /* Avoid sub-pixel text effects */
     text-rendering:                 optimizeSpeed;
     -webkit-font-smoothing:         none;
     font-feature-settings:          normal;
 }
 
 body.pb-tier-low #chat .avatar img {
-    /* Cheap scaling on low-end GPU */
     image-rendering: pixelated;
 }
 
-/* Disable all CSS keyframe animations for low-end */
-body.pb-tier-low *,
+body.pb-tier-low * ,
 body.pb-tier-low *::before,
 body.pb-tier-low *::after {
     animation-duration:        0.001ms !important;
     animation-iteration-count: 1       !important;
     transition-duration:       0.001ms !important;
+}
+
+/* Kill decorative chrome that tanks mid-range Android GPUs */
+body.pb-tier-low #top-bar,
+body.pb-tier-low #top-settings-holder,
+body.pb-tier-low .drawer-content,
+body.pb-tier-low #rm_print_characters_block,
+body.pb-tier-low #right-nav-panel,
+body.pb-tier-low #left-nav-panel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.pb-tier-low #bg1,
+body.pb-tier-low #bg2 {
+    filter: none !important;
+    transform: none !important;
+    will-change: auto !important;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -72,31 +77,25 @@ body.pb-tier-medium #chat .mes_text {
     text-rendering: optimizeLegibility;
 }
 
-/* Keep transitions but cap them at 150 ms */
 body.pb-tier-medium * {
     transition-duration: min(var(--transition-duration, 0.3s), 0.15s) !important;
 }
 
 /* ══════════════════════════════════════════════════════════
-   GOOD-TIER — near-full fidelity; minimal hints only
+   GOOD / HIGH — near-full fidelity
    ══════════════════════════════════════════════════════════ */
 
 body.pb-tier-good #chat .mes_text {
     text-rendering: optimizeLegibility;
 }
 
-/* ══════════════════════════════════════════════════════════
-   HIGH-TIER — no restrictions; hints only
-   ══════════════════════════════════════════════════════════ */
-
 body.pb-tier-good #chat,
 body.pb-tier-high #chat {
-    /* Hint the browser which layer to pre-composite */
     will-change: transform;
 }
 
 /* ══════════════════════════════════════════════════════════
-   Performance HUD  (hidden by default, shown when showHUD=true)
+   Performance HUD
    ══════════════════════════════════════════════════════════ */
 
 #pb-hud {
@@ -120,97 +119,143 @@ body.pb-show-hud #pb-hud {
 }
 
 /* ══════════════════════════════════════════════════════════
-   Extension Settings Panel styling
+   Extension Settings Panel — native ST inline-drawer layout
    ══════════════════════════════════════════════════════════ */
 
 #pb-settings-panel {
-    padding: 8px 0;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-/* ── Collapsible dropdown sections ───────────────────────── */
-#pb-settings-panel .pb-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    margin-top: 4px;
+/* Keep nested drawers / headers from overflowing on phones */
+#pb-settings-panel .inline-drawer-toggle.inline-drawer-header {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    gap: 6px;
 }
 
-#pb-settings-panel .pb-section-header {
-    display:        flex;
-    align-items:    center;
-    justify-content: space-between;
-    width:          100%;
-    padding:        8px 2px;
-    background:     none;
-    border:        none;
-    cursor:        pointer;
-    color:         inherit;
-    text-align:    left;
+#pb-settings-panel .inline-drawer-toggle.inline-drawer-header > :not(.inline-drawer-icon) {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-#pb-settings-panel .pb-section-header:hover .pb-section-title {
-    opacity: 0.9;
+#pb-settings-panel .inline-drawer-content {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-#pb-settings-panel .pb-section-title {
-    font-size:   0.8rem;
+/* Tier chip next to title */
+.pb-tier-chip {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 0.68rem;
     font-weight: 700;
-    opacity:     0.6;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+.pb-chip-low    { background: #c0392b33; color: #e74c3c; }
+.pb-chip-medium { background: #e67e2233; color: #e67e22; }
+.pb-chip-good   { background: #2980b933; color: #3498db; }
+.pb-chip-high   { background: #27ae6033; color: #2ecc71; }
+
+/* Quick action buttons — wrap like other ST menu_button rows */
+.pb-quick-actions {
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin: 6px 0 2px;
 }
 
-#pb-settings-panel .pb-section-arrow {
-    font-size:  0.75rem;
-    opacity:    0.5;
-    transition: transform 0.18s ease;
+.pb-quick-actions .menu_button {
+    flex: 1 1 auto;
+    min-width: min(100%, 9.5rem);
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-#pb-settings-panel .pb-section.pb-collapsed .pb-section-arrow {
-    transform: rotate(-90deg);
+.pb-action-primary {
+    font-weight: 700 !important;
+    border: 1px solid rgba(46, 204, 113, 0.45) !important;
+    background: rgba(46, 204, 113, 0.12) !important;
 }
 
-#pb-settings-panel .pb-section-body {
-    overflow:    hidden;
-    padding:     2px 2px 10px;
-    max-height:  1000px;
-    transition:  max-height 0.25s ease, opacity 0.2s ease;
+.pb-quick-hint {
+    display: block;
+    opacity: 0.6;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    margin: 2px 0 10px;
 }
 
-#pb-settings-panel .pb-section.pb-collapsed .pb-section-body {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    opacity:    0;
+.pb-help {
+    display: block;
+    opacity: 0.6;
+    margin: 2px 0 8px 24px;
+    font-size: 0.75rem;
+    line-height: 1.4;
 }
 
-/* ── Disabled sub-option group ───────────────────────────── */
+.pb-muted { opacity: 0.6; }
+
+.pb-suboptions {
+    margin: 4px 0 6px 24px;
+}
+
 #pb-anim-suboptions.pb-disabled {
     opacity:        0.4;
     pointer-events: none;
 }
 
-/* ── Live RAM monitor ────────────────────────────────────── */
-#pb-ram-monitor {
+/* Live RAM monitor */
+#pb-ram-monitor,
+.pb-ram-monitor {
     background:    rgba(255, 255, 255, 0.04);
     border-radius: 6px;
-    padding:      8px 10px;
-    margin:       4px 0 4px;
+    padding:      10px 12px;
+    margin:       6px 0 8px;
     font-size:    0.8rem;
+    min-width:    0;
 }
 
 .pb-ram-row {
     display:         flex;
     align-items:     center;
     justify-content: space-between;
+    gap:             8px;
+    min-width:       0;
 }
 
-.pb-ram-label  { opacity: 0.65; }
-.pb-ram-value  { font-family: monospace; font-weight: 600; }
+.pb-ram-row-gap { margin-top: 6px; }
+
+.pb-ram-label  {
+    opacity: 0.65;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.pb-ram-value  {
+    font-family: monospace;
+    font-weight: 600;
+    flex-shrink: 0;
+}
 
 .pb-ram-bar {
     position:      relative;
-    height:        8px;
-    margin-top:    6px;
-    border-radius: 4px;
+    height:        10px;
+    margin-top:    8px;
+    border-radius: 5px;
     background:    rgba(255, 255, 255, 0.1);
     overflow:      hidden;
 }
@@ -218,7 +263,7 @@ body.pb-show-hud #pb-hud {
 #pb-ram-bar-fill {
     height:        100%;
     width:         0%;
-    border-radius: 4px;
+    border-radius: 5px;
     transition:    width 0.4s ease, background-color 0.3s ease;
 }
 
@@ -230,38 +275,76 @@ body.pb-show-hud #pb-hud {
     position:   absolute;
     top:        -1px;
     width:      2px;
-    height:     10px;
+    height:     12px;
     background: rgba(255, 255, 255, 0.7);
     transform:  translateX(-1px);
 }
 
-#pb-device-info {
-    display:       none;        /* shown via JS once device is detected */
+#pb-device-info,
+.pb-device-info {
+    display:       none;
     background:    rgba(255,255,255,0.05);
     border-radius: 6px;
-    padding:       6px 10px;
-    font-size:     0.8rem;
+    padding:       8px 10px;
+    font-size:     0.78rem;
+    line-height:   1.45;
     margin-bottom: 10px;
+    word-break:    break-word;
+    overflow-wrap: anywhere;
 }
 
-.pb-badge {
-    display:        inline-block;
-    padding:        2px 7px;
-    border-radius:  4px;
-    font-size:      0.72rem;
-    font-weight:    600;
-    text-transform: uppercase;
+/* Tips list */
+.pb-tips-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    opacity: 0.9;
 }
 
-.pb-badge-low    { background: #c0392b22; color: #e74c3c; }
-.pb-badge-medium { background: #e67e2222; color: #e67e22; }
-.pb-badge-good   { background: #2980b922; color: #3498db; }
-.pb-badge-high   { background: #27ae6022; color: #2ecc71; }
+.pb-tips-list li { margin-bottom: 6px; }
+.pb-tips-list code {
+    font-size: 0.72rem;
+    background: rgba(0,0,0,0.25);
+    padding: 1px 4px;
+    border-radius: 3px;
+    word-break: break-all;
+}
+
+/* Checkbox rows: prevent text overflow on narrow phones */
+#pb-settings-panel .checkbox_label {
+    min-width: 0;
+    max-width: 100%;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+#pb-settings-panel .checkbox_label > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#pb-settings-panel label[for] {
+    display: block;
+    margin-top: 6px;
+}
+
+#pb-settings-panel select.text_pole,
+#pb-settings-panel input.neo-range-slider {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #pb-ram-bar-fill {
+        transition: none !important;
+    }
+}
 
 /* ══════════════════════════════════════════════════════════
    Heap-boost recommendation modal
-   Suggests raising Node's --max-old-space-size when the JS heap
-   is tight but the device still has spare RAM.
    ══════════════════════════════════════════════════════════ */
 
 #pb-boost-overlay {
@@ -271,8 +354,6 @@ body.pb-show-hud #pb-hud {
     display:         flex;
     align-items:     center;
     justify-content: center;
-    /* Use the *small* dynamic viewport so the mobile address bar can't push
-       the dialog off-screen. Falls back to vh on older browsers. */
     height:          100vh;
     height:          100svh;
     padding:         16px;
@@ -284,8 +365,6 @@ body.pb-show-hud #pb-hud {
 #pb-boost-modal {
     position:      relative;
     width:         min(440px, 100%);
-    /* Never taller than the visible area; scroll *inside* the modal instead
-       of letting it overflow the screen. */
     max-height:    100%;
     overflow-y:    auto;
     -webkit-overflow-scrolling: touch;
@@ -296,11 +375,11 @@ body.pb-show-hud #pb-hud {
     color:        var(--SmartThemeBodyColor, #e8e8e8);
     box-shadow:   0 12px 40px rgba(0, 0, 0, 0.5);
     border:       1px solid rgba(255, 255, 255, 0.08);
+    box-sizing:   border-box;
 }
 
-
 #pb-boost-modal h3 {
-    margin:      0 0 12px;
+    margin:      0 28px 12px 0;
     font-size:   1.05rem;
     font-weight: 700;
 }
@@ -309,16 +388,17 @@ body.pb-show-hud #pb-hud {
     position:    absolute;
     top:         10px;
     right:       12px;
-    width:       26px;
-    height:      26px;
+    width:       36px;
+    height:      36px;
     padding:     0;
     border:      none;
-    border-radius: 6px;
+    border-radius: 8px;
     background:  none;
     color:      inherit;
     opacity:    0.6;
     cursor:     pointer;
-    font-size:  0.95rem;
+    font-size:  1rem;
+    touch-action: manipulation;
 }
 
 #pb-boost-close:hover { opacity: 1; }
@@ -335,6 +415,7 @@ body.pb-show-hud #pb-hud {
     align-items: stretch;
     gap:         6px;
     margin:      10px 0 6px;
+    min-width:   0;
 }
 
 #pb-boost-cmd {
@@ -351,7 +432,7 @@ body.pb-show-hud #pb-hud {
     user-select:  all;
 }
 
-#pb-boost-copy { white-space: nowrap; align-self: center; }
+#pb-boost-copy { white-space: nowrap; align-self: center; min-height: 36px; }
 
 .pb-boost-note {
     display:     block;
@@ -375,17 +456,12 @@ body.pb-show-hud #pb-hud {
     justify-content: space-between;
     gap:             10px;
     margin-top:      16px;
-    flex-wrap:       wrap;   /* don't overflow on narrow phones */
+    flex-wrap:       wrap;
 }
 
-/* ── Phone-sized screens ─────────────────────────────────────
-   Drop the centered padding and trim inner spacing so the
-   dialog uses the available width without bleeding off-screen.
- ──────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
     #pb-boost-overlay {
         padding: 10px;
-        /* Pin to the top so the title is visible immediately on tall content. */
         align-items: flex-start;
     }
 
@@ -395,9 +471,24 @@ body.pb-show-hud #pb-hud {
     }
 
     .pb-boost-cmd-row {
-        flex-direction: column;   /* stack the command above its copy button */
+        flex-direction: column;
         align-items:    stretch;
     }
 
     #pb-boost-copy { align-self: flex-end; }
+
+    .pb-quick-actions .menu_button {
+        min-width: 100%;
+    }
+}
+
+/* ST forces #extensions_settings full width on mobile — keep panel contained */
+@media (max-width: 1000px) {
+    #pb-settings-panel,
+    #pb-settings-panel .inline-drawer,
+    #pb-settings-panel .inline-drawer-content {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 }
