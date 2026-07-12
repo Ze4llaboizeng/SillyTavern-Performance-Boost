@@ -1,106 +1,113 @@
 # ⚡ SillyTavern Performance Boost
 
-**SillyTavern Performance Boost** เป็นส่วนขยาย (Extension) สำหรับ SillyTavern ที่ถูกออกแบบมาเพื่อเพิ่มประสิทธิภาพการทำงานและลดภาระการประมวลผลบนอุปกรณ์พกพา (Mobile) รวมถึงเครื่องคอมพิวเตอร์สเปกต่ำ (Low-end Devices) โดยจะเน้นไปที่การจัดการหน่วยความจำ, การเพิ่มความเร็วในการเรนเดอร์ข้อความแชต, การโหลดรูปภาพแบบอัจฉริยะ และการควบคุมทรัพยากรระบบไม่ให้เบราว์เซอร์เกิดอาการค้างหรือแครช (Crash) ในระหว่างการทำ Roleplay ระยะยาว
+**SillyTavern Performance Boost** is a SillyTavern extension for low-RAM phones and weak clients: less paint, fewer decoded images, fewer DOM messages on screen, and one-tap **Phone Saver** that applies official ST performance knobs.
 
 ---
 
-## 🚀 คุณสมบัติเด่น (Features)
+## 🚀 Features
 
-### 1. ระบบตรวจจับข้อมูลอุปกรณ์อัตโนมัติ (Device Profiler)
-* **สัญญาณหลักจาก JS Heap**: บนเบราว์เซอร์ตระกูล Chromium (Chrome/Edge) ระบบจะอ่านเพดานหน่วยความจำจาวาสคริปต์ (`performance.memory.jsHeapSizeLimit`) มาใช้เป็นตัวกำหนดระดับอุปกรณ์เป็นหลัก เพราะเพดานนี้คือขีดจำกัดจริงว่าเราเก็บประวัติแชตไว้พร้อมกันได้มากแค่ไหน
-* **การวิเคราะห์สำรอง (Composite Score)**: เมื่อ `performance.memory` ใช้งานไม่ได้ (เช่น Firefox/Safari) ระบบจะคำนวณคะแนนรวม 0–16 จากความจุ RAM, จำนวนคอร์ CPU, ผลทดสอบ FPS ในช่วงเริ่มต้น และหักคะแนนหากเป็นอุปกรณ์มือถือแทน
-* **การปรับระดับอัตโนมัติ (Tier Allocation)**: แบ่งระดับอุปกรณ์ออกเป็น 4 ระดับ ได้แก่ **Low (🔴 ล่างสุด)**, **Medium (🟡 กลาง ๆ)**, **Good (🔵 พอใช้ได้)** และ **High (🟢 ยอดเยี่ยม)** พร้อมเปิด/ปิดฟังก์ชันที่เหมาะสมให้ทันทีโดยที่ผู้ใช้ไม่ต้องตั้งค่าเอง
-* **คำแนะนำเพิ่มเพดานแรม (Heap Boost)**: หากตรวจพบว่าเพดาน Heap แคบแต่เครื่องยังมี RAM เหลือ ระบบจะเสนอคำสั่งตั้งค่า `NODE_OPTIONS=--max-old-space-size` เพื่อให้ขยายเพดานหน่วยความจำของ SillyTavern ได้
+### 1. Device Profiler
+* **Heap-first tiering** on Chromium (`performance.memory.jsHeapSizeLimit`)
+* **Composite score** fallback (RAM / cores / FPS / mobile / network)
+* **4 tiers**: Low / Medium / Good / High — with a **mobile RAM floor** (≤2 GB → LOW)
+* Optional **NODE_OPTIONS heap boost** hint when host RAM is spare
 
-### 2. การจำลองการเลื่อนข้อความขั้นสูง (Virtual Scrolling)
-* **สองเลเยอร์การป้องกัน**: 
-  * **Layer 1 (Native CSS)**: ใช้คุณสมบัติ `content-visibility: auto` เพื่อบอกให้เบราว์เซอร์ข้ามการประมวลผล (Layout และ Paint) ของข้อความแชตที่ยังไม่ถูกเลื่อนมาแสดงผลบนหน้าจอ (ลดต้นทุนสไตล์เรนเดอร์เหลือ 0)
-  * **Layer 2 (IntersectionObserver)**: เมื่อเปิดโหมดดุดัน (Aggressive Mode) ระบบจะใช้ JavaScript ตรวจสอบระยะห่าง หากข้อความอยู่ห่างจากหน้าจอเกิน 2 เท่าของความสูง Viewport จะถูกซ่อนด้วย `content-visibility: hidden` ทันที เพื่อประหยัด Render Budget (โหมดนี้จะถูกเปิดอัตโนมัติในระดับ Low tier)
-* **ปลอดภัยต่อสคริปต์อื่น**: รักษาโครงสร้าง DOM ของแชตไว้ครบถ้วน ทำให้ Event Handlers ของ jQuery (ปุ่ม Edit, Regen, Copy) ของ SillyTavern ไม่พังหรือใช้งานไม่ได้เหมือนระบบลบ Node ทั่วไป
+### 2. Virtual Scrolling
+* Layer 1: `content-visibility: auto` (zero-JS skip of off-screen messages)
+* Layer 2 (aggressive): hide far messages with `content-visibility: hidden` + `contain: strict`
+* Keeps `.mes` DOM so ST jQuery handlers stay intact
 
-### 3. ระบบโหลดรูปภาพอัจฉริยะ (Lazy Image Loading)
-* **ชะลอการโหลดภาพขนาดใหญ่**: ภาพโปรไฟล์ตัวละคร (Avatars) และภาพแสดงอารมณ์สไปรท์ (Expression Sprites) ที่ปกติมีขนาดใหญ่และกินแรม จะถูกแทนที่ด้วยภาพ Placeholder ชั่วคราว และจะโหลดภาพจริงก็ต่อเมื่อรูปภาพนั้นกำลังจะเลื่อนเข้ามาในหน้าจอในระยะ 150px เท่านั้น
-* **ฮินท์ระดับเบราว์เซอร์**: เพิ่มแอตทริบิวต์ `loading="lazy"` และ `decoding="async"` บนแท็กอิมเมจทั้งหมดโดยอัตโนมัติ
+### 3. Lazy Image Loading
+* Defers avatars / expression sprites until near viewport
+* `loading=lazy`, `decoding=async`, `fetchpriority=low` until visible
 
-### 4. ระบบปรับปรุงการเลื่อนหน้าจอ (Scroll Optimizer)
-* **ลดการ Recalc สไตล์**: ในระหว่างที่ผู้ใช้กำลังทำการเลื่อนหน้าจออย่างรวดเร็ว ระบบจะทำการเปิดใช้งานคลาสพิเศษเพื่อสั่ง `pointer-events: none` บนข้อความแชตทั้งหมด ป้องกันไม่ให้เกิดการคำนวณเอฟเฟกต์ Hover ที่ไม่จำเป็น
-* **เร่งด้วย Compositor Layer**: ยกระดับคอนเทนเนอร์แชตด้วย `will-change` และเพิ่ม `overscroll-behavior: contain` เพื่อป้องกันการ scroll-chaining บนมือถือ
-* **Throttling ด้วย rAF**: จัดระเบียบ Event Listener ของการเลื่อนหน้าจอด้วย `requestAnimationFrame` ร่วมกับคุณสมบัติแบบ `passive: true` เพื่อไม่ให้บล็อก Thread หลักของการแสดงผล
+### 4. Scroll Optimizer
+* `will-change` / containment while scrolling, `overscroll-behavior: contain`
+* Passive + rAF-throttled scroll listeners
 
-### 5. ระบบควบคุมแอนิเมชันและเอฟเฟกต์กราฟิก (Animation Controller)
-* **ลดภาระ GPU**: บนอุปกรณ์สเปกต่ำ ระบบจะบังคับปิดเอฟเฟกต์ที่กินพลังงานการประมวลผลสูง เช่น เอฟเฟกต์กระจกเบลอ (`backdrop-filter`), เงาข้อความและกล่อง (`text-shadow`/`box-shadow`)
-* **ตัดความหน่วงของทรานซิชัน**: ปรับเปลี่ยนเวลาในการทำแอนิเมชันและทรานซิชันต่างๆ ของ UI ให้กลายเป็น 0.01ms เพื่อให้การตอบสนองของหน้าจอทำได้ฉับไวที่สุด และลดอาการหน่วง
-* **เคารพการตั้งค่าระบบ**: รองรับ media query `prefers-reduced-motion` ของระบบปฏิบัติการ และจะปรับลดแอนิเมชันตามค่านี้โดยอัตโนมัติ
+### 5. Animation Controller
+* Strip blur / shadows / transitions on low tier
+* Honors `prefers-reduced-motion`
 
-### 6. ระบบเฝ้าระวังหน่วยความจำ (Memory Monitor)
-* **เฝ้าระวัง JS Heap**: คอยตรวจสอบหน่วยความจำจาวาสคริปต์ (เฉพาะบน Chrome, Edge และเบราว์เซอร์ตระกูล Chromium) รวมถึงคอยนับจำนวนข้อความแชตที่ถูกเรนเดอร์อยู่จริง โดยตรวจซ้ำทุก ๆ 30 วินาที
-* **ยกระดับการป้องกันอัตโนมัติ**: เมื่อพบว่าหน่วยความจำถูกใช้งานเกินค่า Threshold (ค่าเริ่มต้น 80% ปรับได้ 50–95%) หรือข้อความแชตมีจำนวนมากกว่า 500 ข้อความ ระบบจะทำการเปิดใช้งานโหมด Virtualization แบบดุดันโดยอัตโนมัติ และแจ้งเตือนผู้ใช้ผ่านระบบ Toastr Notification ของ SillyTavern เพื่อป้องกันแอปพลิเคชันปิดตัวเอง
+### 6. Memory Monitor
+* Watches JS heap + rendered message count
+* On pressure: aggressive virtual scroll + force image detach + collapse old media
+* Pauses when the tab is hidden
+
+### 7. ST Core Hints (official ST FAQ knobs)
+* **Fast UI / No Blur** (`power_user.fast_ui_mode` → `body.no-blur`)
+* **Reduced motion**, **Streaming FPS**, **# Messages to Load** (`chat_truncation`)
+* Disables smooth streaming / stream fade-in on weak tiers
+* Syncs User Settings checkboxes/sliders
+
+### 8. Idle / Battery Guard
+* Pauses monitors when tab is hidden
+* Low-battery freeze of decorative backgrounds
+
+### 9. DOM Janitor
+* Detaches decoded bitmaps of far-off images (layout preserved)
+* Optional collapse of older media blocks
+* **Clean Now** for emergency free-up
+
+### 10. Phone Saver (one-tap)
+* Low-tier profile: Fast UI + ~12 FPS stream + ~40 messages loaded + aggressive virtual scroll + freeze backgrounds + detach far images
 
 ---
 
-## 📁 โครงสร้างโฟลเดอร์ของโปรเจกต์ (Project Structure)
+## 📁 Project structure
 
 ```text
-sillytavern-performance-boost/
-├── .github/
-│   ├── workflows/
-│   │   └── release.yml               # ระบบสร้างไฟล์ Zip สำหรับ Release อัตโนมัติบน GitHub
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.yml            # แบบฟอร์มกรอกข้อมูลสำหรับรายงานบั๊ก (GitHub Issue Form)
-│       └── feature_request.yml       # แบบฟอร์มสำหรับเสนอแนะฟีเจอร์ใหม่
+SillyTavern-Performance-Boost/
 ├── src/
 │   ├── core/
-│   │   ├── deviceDetector.js         # โมดูลวิเคราะห์และจัดระดับสเปกอุปกรณ์ (4 tier)
-│   │   ├── memoryMonitor.js          # โมดูลเฝ้าระวัง JS Heap และนับจำนวนข้อความแชต
-│   │   └── virtualizer.js            # สำเนาต้นฉบับของคลาส VirtualScroll (ปัจจุบันรันจากไฟล์ใน optimizations/)
+│   │   ├── deviceDetector.js
+│   │   ├── memoryMonitor.js
+│   │   └── virtualizer.js            # legacy; runtime uses optimizations/virtualScroll.js
 │   ├── optimizations/
-│   │   ├── animationController.js    # โมดูลจัดการและลดทอนเอฟเฟกต์กราฟิก/แอนิเมชัน
-│   │   ├── imageOptimizer.js         # โมดูลทำ Lazy Load รูปภาพและสไปรท์อารมณ์
-│   │   ├── scrollOptimizer.js        # โมดูลเร่งความเร็วการเลื่อนหน้าจอและลด Jank
-│   │   └── virtualScroll.js          # โมดูลทำ Virtual Scrolling สองเลเยอร์ให้กับแชต
+│   │   ├── stCoreHints.js
+│   │   ├── idleGuard.js
+│   │   ├── domJanitor.js
+│   │   ├── animationController.js
+│   │   ├── imageOptimizer.js
+│   │   ├── scrollOptimizer.js
+│   │   └── virtualScroll.js
 │   └── ui/
-│       └── settingsPanel.js          # โมดูลควบคุม Event และการแสดงผลแผงตั้งค่า Extension
-├── index.js                          # ไฟล์ Entry Point หลักที่คอยเชื่อมต่อกับ API ของ SillyTavern
-├── manifest.json                     # ไฟล์ Metadata ระบุข้อมูลจำเพาะของ Extension
-├── settings.html                     # หน้าต่าง UI แผงการตั้งค่าสำหรับฉีดเข้าหน้าต่างเมนูหลัก
-├── style.css                         # สไตล์ชีตจัดการ Layer และการสลับโหมดตาม Tier คลาสบน <body>
-├── CHANGELOG.md                      # บันทึกการเปลี่ยนแปลงในแต่ละเวอร์ชัน
-└── LICENSE                           # สัญญาอนุญาตการใช้งาน
+│       └── settingsPanel.js
+├── index.js
+├── manifest.json
+├── settings.html
+├── style.css
+├── CHANGELOG.md
+└── LICENSE
 ```
 
-### 🛠️ วิธีการติดตั้ง (Installation)
-1. เปิดโปรแกรม SillyTavern ของคุณขึ้นมา
-2. คลิกที่ไอคอน Extensions บริเวณแถบเมนูด้านบน
-3. แล้วคลิกปุ่ม Install Extension
-4. นำ URL ของคลังโค้ดนี้ไปวางในช่องกรอกข้อมูล: `https://github.com/Ze4llaboizeng/SillyTavern-Performance-Boost`
-5. คลิกปุ่ม Install จากนั้นรีเฟรชหน้าเว็บ SillyTavern 1 ครั้ง ตัวระบบจะเริ่มทำงานและตรวจจับอุปกรณ์ของคุณทันที
+### Install
+1. Open SillyTavern
+2. Extensions → Install Extension
+3. URL: `https://github.com/Ze4llaboizeng/SillyTavern-Performance-Boost`
+4. Install, then refresh once
 
-### ⚙️ การตั้งค่าและปรับแต่ง (Configuration)
-เมื่อทำการติดตั้งเสร็จสมบูรณ์ คุณสามารถเปิดแผงควบคุมหลักได้ที่เมนูส่วนขยาย โดยจะแบ่งออกเป็น 3 ส่วนหลัก:
+### Settings panel
+**Quick actions**
+* **Phone Saver** — recommended first action on phones
+* **Apply ST Tips** — apply Fast UI / FPS / truncation for current tier
+* **Clean Now** — detach far images immediately
 
-**Device Profile**
-* **Enable** — สวิตช์หลักสำหรับเปิดหรือปิดการทำงานของส่วนขยายนี้ทั้งหมด
-* **Auto-detect device tier** — หากติ๊กเลือก ระบบจะเลือกโปรไฟล์ความเร็วที่เหมาะสมกับอุปกรณ์ของคุณให้เอง
-* **Manual tier override** — เลือกระดับเองได้ระหว่าง Auto / 🔴 Low (ล่างสุด) / 🟡 Medium (กลาง ๆ) / 🔵 Good (พอใช้ได้) / 🟢 High (ยอดเยี่ยม)
-* **Re-detect Device** — ปุ่มสั่งให้ระบบตรวจจับสเปกอุปกรณ์ใหม่อีกครั้ง
+**Device / Memory / Optimizations**
+* Auto tier, heap threshold (default **75%**), message-count trigger (default **300**)
+* ST Core Hints, Virtual Scroll, Lazy Images, DOM Janitor, Idle Guard, Reduce Animations
 
-**Memory Monitor**
-* **Enable Memory Monitor** — คอยจับตาดูการใช้งานหน่วยความจำแรมและการสะสมของแชตบล็อก พร้อมแสดงค่า JS Heap และจำนวนข้อความที่เรนเดอร์อยู่แบบเรียลไทม์
-* **Heap pressure threshold** — แถบสไลเดอร์ปรับระดับเปอร์เซ็นต์การใช้ Heap ที่จะให้ระบบเริ่มยกระดับการป้องกัน (50–95%, ค่าเริ่มต้น 80%)
+### Low-RAM phone checklist (ST FAQ + Termux)
+1. Tap **Phone Saver**
+2. Enable browser Hardware Acceleration
+3. Disable heavy extensions (Live2D / VRM / talkinghead) if possible
+4. Termux host: `performance.lazyLoadCharacters: true`, `useDiskCache: false` in `config.yaml`
+5. Best pattern: run ST on PC/server, open the UI in the phone browser
 
-**Optimizations**
-* **Virtual Scrolling** — เปิด/ปิดระบบจำลองแชตเพื่อสคิปการเรนเดอร์ข้อความนอกสายตา (แนะนำให้เปิดไว้เสมอ)
-* **Aggressive mode** — เปิดการซ่อนข้อความที่อยู่ห่างไกลแบบถาวร (จะถูกเปิดใช้อัตโนมัติในระดับ Low tier)
-* **Lazy Image Loading** — เปิด/ปิดการชะลอการโหลดรูปภาพสไปรท์และอวตารตัวละคร
-* **Scroll Optimizer** — เปิดใช้งานการควบคุมพอยน์เตอร์แอนิเมชันขณะกำลังสกรอลล์หน้าจอ
-* **Reduce Animations** — บังคับให้หน้าต่างและปุ่มต่างๆ ตอบสนองทันทีโดยไม่มีทรานซิชันหน่วงเวลา พร้อมตัวเลือกย่อย:
-  * **Disable blur effects** — ปิดเอฟเฟกต์เบลอ/backdrop-filter ที่กิน GPU บนมือถือ
-  * **Disable shadows** — ปิดเงาของกล่องและข้อความ (`box-shadow`/`text-shadow`)
-  * **Disable transitions** — ปิดทรานซิชัน CSS ทั้งหมด
+### Sources used (Reddit APIs were blocked from this environment)
+* https://docs.sillytavern.app/usage/faq/ (Performance Tips)
+* https://docs.sillytavern.app/installation/android-(termux)/ (performance tweaks)
+* ST core `power-user.js` keys: `fast_ui_mode`, `reduced_motion`, `streaming_fps`, `chat_truncation`, `smooth_streaming`, `stream_fade_in`, `noShadows`
 
-### 🤝 การมีส่วนร่วมและการรายงานปัญหา (Contribution & Bug Report)
-หากคุณพบปัญหาการใช้งาน โครงสร้างแชตเพี้ยน หรือต้องการเสนอแนะไอเดียการเพิ่มความเร็วในส่วนอื่นๆ:
-
-* โปรดเข้าไปที่หน้า Issues บน GitHub Repository ของโปรเจกต์นี้
-* คลิกที่ปุ่ม New Issue จากนั้นเลือกแบบฟอร์มที่ตรงกับจุดประสงค์ของคุณ (Bug Report หรือ Feature Request)
-* กรอกข้อมูลในช่องเว็บฟอร์มที่ระบบเตรียมไว้ให้ครบถ้วนเพื่อให้ผู้พัฒนาสามารถตรวจสอบและจำลองปัญหาได้ง่ายขึ้น
+### Contribute / bugs
+Open a GitHub Issue with the Bug Report or Feature Request form.

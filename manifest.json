@@ -1,12 +1,13 @@
 {
     "display_name": "Performance Boost",
-    "version": "0.0.1",
-    "description": "Optimizes SillyTavern for mobile devices — virtual scrolling, lazy images, memory management, and automatic device profiling for both low-end and high-end phones.",
+    "version": "0.1.1",
+    "description": "Mobile-first SillyTavern performance: Phone Saver profile, ST official tips (Fast UI / streaming FPS / chat truncation), virtual scroll, image detach, idle/battery guard, and auto device tiers for low-RAM phones.",
     "js": "index.js",
     "css": "style.css",
     "settings": "settings.html",
     "author": "Zealllll",
     "homepage": "https://github.com/Ze4llaboizeng/SillyTavern-Performance-Boost",
-    "tags": ["performance", "mobile", "optimization"],
-    "requires": []
+    "tags": ["performance", "mobile", "optimization", "low-ram"],
+    "requires": [],
+    "loading_order": 200
 }
